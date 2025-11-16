@@ -107,6 +107,7 @@ class TextClassifierLSTM(nn.Module):
 ```
 
 **模型解析**:
+
 1.  **`__init__`**:
     *   除了词嵌入层 `nn.Embedding` 和分类层 `nn.Linear`，核心是一个 `nn.LSTM` 层。
     *   增加几个 LSTM 相关的超参数：`n_layers` (LSTM层数), `dropout` (层间丢弃率), `bidirectional` (是否使用双向LSTM)。
@@ -185,7 +186,7 @@ hparams = {
     "hidden_dim": 256,
     "num_classes": len(train_dataset_raw.target_names),
     "n_layers": 2,          # 新增
-    "dropout": 0,         # 新增
+    "dropout": 0,           # 新增：此处显式设为 0，当前不启用 Dropout
     "bidirectional": True,  # 新增
     "epochs": 20,
     "learning_rate": 0.001,
@@ -324,7 +325,7 @@ class TrainerWithEarlyStopping(Trainer):
 train_dataset_reg = TextClassificationDatasetWithMasking(
     ..., is_train=True, mask_prob=0.1
 )
-train_loader_reg = DataLoader(train_dataset_reg, ...)
+train_loader_reg = DataLoader(train_dataset_reg, ..., collate_fn=collate_fn)  # 继续使用前面改造过的 collate_fn，以便返回 lengths
 
 # 2. 实例化模型，并启用 Dropout
 model_reg = TextClassifierLSTM(
@@ -337,6 +338,7 @@ model_reg = TextClassifierLSTM(
 trainer_reg = TrainerWithEarlyStopping(
     model_reg,
     ...,
+    output_dir="output_lstm_regularized",
     patience=3
 )
 
@@ -383,11 +385,11 @@ Epoch 19/20 | 训练损失: 0.0136 | 验证集准确率: 0.8066
 这个结果展示了正则化策略的价值：
 
 -   **相比于无正则化的LSTM（~0.8143）**：性能得到了**明显提升**。这证明我们之前的判断是正确的——基础 LSTM 模型的一个主要问题就是过拟合。通过数据增强、提前停止和层间Dropout的组合，有效地抑制了模型对训练数据的“死记硬背”，使它学习到了更具泛化能力的模式。
-    -   **随机Token遮盖**强迫模型不能过度依赖训练集中少数几个“明星”关键词（例如特定作者），而是要学会识别更广泛、更多样化的关键词组合来做出判断，从而提升模型的鲁棒性和泛化能力。
+    -   **随机 Token 遮盖**强迫模型不能过度依赖训练集中少数几个“明星”关键词（例如特定作者），而是要学会识别更广泛、更多样化的关键词组合来做出判断，从而提升模型的鲁棒性和泛化能力。
     -   **提前停止**则像一个“安全阀”，在模型性能达到巅峰并即将开始下滑（过拟合）的时刻及时终止了训练，锁定了最佳的模型状态。
-    -   **Dropout**是在 LSTM 层之间随机“关闭”一些神经元，破坏了神经元之间可能形成的“共适应”关系，增强了模型的独立特征学习能力。
+    -   **Dropout**在多层 LSTM 中，会对除最后一层外各层的输出施加随机丢弃（dropout），相当于在层与层之间随机“关闭”部分神经元连接，破坏可能形成的“共适应”关系，从而增强模型的独立特征学习能力。
 
 -   **相比于全连接模型（~0.8469）**：经过正则化后，LSTM模型的性能已经非常接近，但仍然略逊于更简单的基线模型。再次证明了对于这个特定的、以关键词为驱动的新闻分类任务，一个高效的“词袋”模型已经足够强大。试图用更复杂的序列模型来捕捉此处并不关键的语序信息，即使在组合了多种正则化策略后，也难以带来超越性的优势。
 
-这个系列的实验为我们提供了一个宝贵的实践经验，同时也印证了著名的“奥卡姆剃刀原理”——**如无必要，勿增实体**。在模型选择上，我们应该**从一个基线开始，逐步增加复杂性，并通过实验去验证每一步改动是否真的带来了收益**。
+这个系列的实验印证了著名的“奥卡姆剃刀原理”——**如无必要，勿增实体**。在模型选择上，我们应该**从一个基线开始，逐步增加复杂性，并通过实验去验证每一步改动是否真的带来了收益**。
 

@@ -194,6 +194,8 @@ sudo apt update && sudo apt upgrade -y
 
 `uv` 本身是一个独立的二进制文件，它支持多种安装方式。在本教程中，我们选择通过 `pip` 来安装和管理它，需要服务器上先有一个 Python 环境。
 
+> `uv` 官方也提供了更简单的安装方式，即使在没有 Python 环境的服务器上，也可以通过 `curl -LsSf https://astral.sh/uv/install.sh | sh` 命令一键安装。不过，笔者在自己的服务器上尝试此方法时遇到了网络问题。所以，当前选择了 `pip` 的方式进行安装。
+
 1.  **检查 Python 版本**
 
     首先，检查服务器上是否已安装 Python，以及其版本。
@@ -202,7 +204,7 @@ sudo apt update && sudo apt upgrade -y
     python3 --version
     ```
     
-    笔者使用的服务器自带了 Python 3.10.12，可以满足需求。如果读者的服务器没有安装 Python，或者版本过低，可以使用 `apt` 来安装。例如，安装 Python 3.10：
+    笔者使用的服务器自带了 Python 3.10.12，可以满足需求。如果服务器中默认没有安装 Python，或者版本过低，可以使用 `apt` 来安装。例如，安装 Python 3.10：
 
     ```bash
     sudo apt install -y python3.10
