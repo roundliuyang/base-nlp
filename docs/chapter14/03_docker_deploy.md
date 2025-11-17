@@ -22,11 +22,11 @@ Docker 的核心概念包括：
 
 当我们使用 Docker 时，会用到 `docker run`、`docker build` 等命令行工具来构建镜像和运行容器。对于单个容器的应用，这些命令尚可应付。但当应用变得复杂，比如需要同时运行一个 API 服务、一个数据库和一个缓存服务时，手动管理多个容器的启动顺序、网络连接和数据卷会变得异常繁琐。
 
-**Docker Compose** 就是 Docker 官方提供的解决方案。它是一个用于定义和运行多容器 Docker 应用的工具。通过一个名为 `docker-compose.yml` 的 YAML 文件，可以配置应用所需的所有服务。然后，只需一个简单的命令 `docker-compose up`，就能够根据配置文件创建并启动所有服务。
+**Docker Compose** 就是 Docker 官方提供的解决方案。它是一个用于定义和运行多容器 Docker 应用的工具。通过一个名为 `docker-compose.yml` 的 YAML 文件，可以配置应用所需的所有服务。然后，只需一个简单的命令 `docker compose up`，就能够根据配置文件创建并启动所有服务。
 
 对于我们当前的单个 NER API 服务，使用 Docker Compose 也能带来诸多好处：
 -   **配置集中化**: 将所有部署相关的参数（如构建指令、端口映射、重启策略）都写在一个文件中，一目了然。
--   **命令简化**: 将冗长的 `docker run` 命令简化为 `docker-compose up`，更易于记忆和使用。
+-   **命令简化**: 将冗长的 `docker run` 命令简化为 `docker compose up`，更易于记忆和使用。
 -   **易于扩展**: 将来若需增加数据库等新服务，仅需在配置文件中添加几行即可。
 
 ## 二、环境准备
@@ -81,7 +81,7 @@ Docker 的核心概念包括：
       "registry-mirrors": ["https://<阿里云镜像 ID>.mirror.aliyuncs.com"]
     }
     ```
-    > 每个阿里云用户都可以免费获取一个专属的镜像加速器地址。获取步骤如下：登录阿里云控制台后，在顶部搜索框搜索“容器镜像服务”，进入后在如图 14-17 左侧菜单的“镜像工具”下找到“镜像加速器”，即可看到专属地址。如果不想注册阿里云，也可以使用其他公开的加速器，如网易的 `http://hub-mirror.c.163.com`。
+    > 每个阿里云用户都可以免费获取一个专属的镜像加速器地址。获取步骤如下：登录阿里云控制台后，在顶部搜索框搜索“容器镜像服务”，进入后在如图 14-17 左侧菜单的“镜像工具”下找到“镜像加速器”，即可看到专属地址。如果不想注册阿里云，也可以使用其他公开的加速器，如网易的 `https://hub-mirror.c.163.com`。
 
     <p align="center">
       <img src="./images/14_3_2.png" width="80%" alt="获取阿里云镜像加速器" />
@@ -122,7 +122,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# 设置 Pypi 镜像源，加速依赖安装
+# 设置 PyPI 镜像源，加速依赖安装
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 RUN pip install --no-cache-dir uv
 
@@ -140,7 +140,7 @@ EXPOSE 8000
 CMD ["gunicorn", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
 ```
 
-这里我们选择了轻量的官方镜像 `python:3.10-slim` 作为基础镜像，并通过 `ENV` 指令关闭 Python 输出缓冲、禁止生成 `.pyc` 文件，让容器中的日志更适合调试、镜像内容更整洁。接着，通过 `WORKDIR /app` 将工作目录固定在 `/app`。考虑到国内网络环境，我们通过 `RUN pip config set` 命令将 PyPI 镜像源永久设置为阿里云镜像，以解决 `pip` 安装依赖时的网络超时问题。然后先安装 `uv`，再仅复制 `pyproject.toml` 并执行 `uv pip install --system --no-cache .` 来安装项目依赖——这种“先复制依赖描述文件，再安装依赖”的方式，可以充分利用 Docker 的层缓存，在依赖不变的情况下避免重复下载和安装。
+这里我们选择了轻量的官方镜像 `python:3.10-slim` 作为基础镜像，并通过 `ENV` 指令关闭 Python 输出缓冲、禁止生成 `.pyc` 文件，让容器中的日志更适合调试、镜像内容更整洁。接着，通过 `WORKDIR /app` 将工作目录固定在 `/app`。考虑到国内网络环境，我们通过 `RUN pip config set` 命令在镜像内持久配置 PyPI 镜像源为阿里云镜像，以解决 `pip` 安装依赖时的网络超时问题。然后先安装 `uv`，再仅复制 `pyproject.toml` 并执行 `uv pip install --system --no-cache .`，根据 `pyproject.toml` 安装当前项目及其依赖——这种“先复制依赖描述文件，再安装依赖”的方式，可以充分利用 Docker 的层缓存，在依赖不变的情况下避免重复下载和安装。
 
 依赖安装完成后，我们再通过 `COPY . .` 将项目全部代码复制进容器，并创建一个名为 `appuser` 的非 root 用户来运行应用，从而降低安全风险。最后，通过 `EXPOSE 8000` 声明服务端口，并在 `CMD` 中使用 `gunicorn -k uvicorn.workers.UvicornWorker` 启动 FastAPI 应用，实现与前文介绍的 `systemd` 方案相同的生产级启动方式，但全部封装在容器内部。
 
@@ -162,7 +162,7 @@ services:
     restart: always
 ```
 
-在这个 Compose 文件中，我们只定义了一个名为 `ner_api` 的服务。通过 `build: .` 指定它使用当前目录下的 `Dockerfile` 来构建镜像，而不是直接从远程仓库拉取现成镜像；`container_name: ner_api_service` 则为该容器指定了一个固定且易于识别的名字，便于在后续调试和运维中使用。`ports` 字段中的 `"8000:8000"` 将云服务器的 8000 端口映射到容器内部的 8000 端口，使外部请求可以通过服务器 IP 访问到容器中的 FastAPI 服务；`restart: always` 则为服务设置了自动重启策略，确保在容器异常退出或服务器重启后，NER 接口能自动恢复运行。这一行配置就替代了上节中需要手动编写 `systemd` 服务文件来实现的持久化功能，更加简洁高效。
+在这个 Compose 文件中，我们只定义了一个名为 `ner_api` 的服务。通过 `build: .` 指定它使用当前目录下的 `Dockerfile` 来构建镜像，而不是直接从远程仓库拉取现成镜像；`container_name: ner_api_service` 则为该容器指定了一个固定且易于识别的名字，便于在后续调试和运维中使用。`ports` 字段中的 `"8000:8000"` 将云服务器的 8000 端口映射到容器内部的 8000 端口，使外部请求可以通过服务器 IP 访问到容器中的 FastAPI 服务；`restart: always` 则为服务设置了自动重启策略，确保在容器异常退出或服务器重启后，NER 接口能自动恢复运行。在大多数单服务场景下，这一行配置基本上可以替代上节中需要手动编写 `systemd` 服务文件来实现的持久化效果，由 Docker 自身接管重启策略，整体更加简洁高效。
 
 ## 四、部署与测试
 
@@ -178,7 +178,7 @@ services:
 sudo systemctl status docker
 ```
 
-如果看到图 14-17 所示绿色的 `active (running)` 字样，说明 Docker 服务正常。如果服务未启动，可以执行 `sudo systemctl start docker` 来启动它。
+如果看到图 14-18 所示绿色的 `active (running)` 字样，说明 Docker 服务正常。如果服务未启动，可以执行 `sudo systemctl start docker` 来启动它。
 
 <p align="center">
   <img src="./images/14_3_3.png" width="80%" alt="检查 Docker 服务状态" />
