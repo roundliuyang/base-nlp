@@ -366,20 +366,14 @@ BertModel(
 
 ## 参考文献
 
-[^1]: [Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2018). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*.]
-(https://arxiv.org/abs/1810.04805)
+[^1]: [Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2018). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*.](https://arxiv.org/abs/1810.04805)
 
-[^2]: [Wu, Y., Schuster, M., Chen, Z., et al. (2016). *Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation*.]
-(https://arxiv.org/abs/1609.08144)
+[^2]: [Wu, Y., Schuster, M., Chen, Z., et al. (2016). *Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation*.](https://arxiv.org/abs/1609.08144)
 
-[^3]: [Cui, Y., Che, W., Liu, T., Qin, B., & Yang, Z. (2019). *Pre-training with Whole Word Masking for Chinese BERT*.]
-(https://arxiv.org/abs/1906.08101)
+[^3]: [Cui, Y., Che, W., Liu, T., Qin, B., & Yang, Z. (2019). *Pre-training with Whole Word Masking for Chinese BERT*.](https://arxiv.org/abs/1906.08101)
 
-[^4]: [Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., et al. (2019). *RoBERTa: A Robustly Optimized BERT Pretraining Approach*.]
-(https://arxiv.org/abs/1907.11692)
+[^4]: [Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., et al. (2019). *RoBERTa: A Robustly Optimized BERT Pretraining Approach*.](https://arxiv.org/abs/1907.11692)
 
-[^5]: [Lan, Z., Chen, M., Goodman, S., Gimpel, K., Sharma, P., Soricut, R. (2019). *ALBERT: A Lite BERT for Self-supervised Learning of Language Representations*.]
-(https://arxiv.org/abs/1909.11942)
+[^5]: [Lan, Z., Chen, M., Goodman, S., Gimpel, K., Sharma, P., Soricut, R. (2019). *ALBERT: A Lite BERT for Self-supervised Learning of Language Representations*.](https://arxiv.org/abs/1909.11942)
 
-[^6]: [Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., Rault,T., Louf, R., Funtowicz, M., Brew, J. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP 2020 System Demonstrations.]
-(https://arxiv.org/abs/1910.03771)
+[^6]: [Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., Rault,T., Louf, R., Funtowicz, M., Brew, J. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP 2020 System Demonstrations.](https://arxiv.org/abs/1910.03771)
