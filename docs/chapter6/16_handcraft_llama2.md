@@ -8,13 +8,13 @@
 
 ## 一、Llama2 架构总览
 
-Llama2 遵循了 GPT 系列开创的 **Decoder-Only** 架构。这意味着它完全由 **Transformer 解码器层** 堆叠而成，天然适用于自回归的文本生成任务。
+Llama2 遵循了 GPT 系列开创的 **Decoder-Only** 架构。这意味着它完全由 **Transformer 解码器层**堆叠而成，天然适用于自回归的文本生成任务。
 
 如图 6-1 所示，Llama2 的核心由 N 个相同的 Transformer Block 堆叠而成。Block 内部的数据流展示了 Llama2 的设计：
 
-- **预归一化 (Pre-Normalization)**：与经典 Transformer 的后归一化不同，输入在进入注意力层和前馈网络**之前**，都会先经过一次 `RMS Norm`。这被认为是提升大模型训练稳定性的关键。
-- **组件升级**：支持 `Grouped-Query Attention (GQA)`（如 Llama2-70B 采用[^1]；小模型可视为 `n_kv_heads == n_heads` 的 MHA 特例），前馈网络采用 `SwiGLU`，归一化使用 `RMSNorm`。
-- **旋转位置编码 (RoPE)**：图中可见，位置信息并非在输入端与词嵌入相加，而是在注意力层内部，通过 `RoPE` 操作动态地施加于查询（Q）和键（K）向量之上。
+- **预归一化（Pre-Normalization）**：与经典 Transformer 的后归一化不同，输入在进入注意力层和前馈网络**之前**，都会先经过一次 `RMS Norm`。这被认为是提升大模型训练稳定性的关键（我们曾提到过，GPT-2/3 正是转向 Pre-Norm 解决了深层网络的训练难题）。
+- **组件升级**：支持 `Grouped-Query Attention（GQA）`（如 Llama2-70B 采用 [^1]；小模型可视为 `n_kv_heads == n_heads` 的 MHA 特例），前馈网络采用 `SwiGLU`，归一化使用 `RMSNorm`。
+- **旋转位置编码（RoPE）**：图中可见，位置信息并非在输入端与词嵌入相加，而是在注意力层内部，通过 `RoPE` 操作动态地施加于查询（Q）和键（K）向量之上。
 - **残差连接**：每个子层（注意力层和前馈网络）的输出都通过残差连接（`+`号）与子层的输入相加，保留了原始信息流。
 
 整个模型的数据流自下而上贯穿所有 Transformer Block，最后经过一次最终的 `RMS Norm` 和一个线性输出层，得到 Logits。
@@ -30,7 +30,7 @@ Llama2 遵循了 GPT 系列开创的 **Decoder-Only** 架构。这意味着它�
 1.  **输入嵌入**：将 `token_ids` 转换为词向量。
 2.  **N x Transformer 层堆叠**：数据依次通过 N 个相同的 Transformer Block。
     -   **预归一化**：在进入子层之前，先进行一次 RMSNorm。
-    -   **注意力子系统**：包含**旋转位置编码**、**分组查询注意力 (GQA)** 和 **KV 缓存**机制。
+    -   **注意力子系统**：包含**旋转位置编码**、**分组查询注意力（GQA）** 和 **KV 缓存**机制。
     -   **前馈网络子系统**：采用 **SwiGLU** 激活函数。
 3.  **最终归一化与输出**：在所有层之后，进行最后一次 RMSNorm，并通过一个线性层将特征映射到词汇表 logits。
 
@@ -42,10 +42,10 @@ Llama2 遵循了 GPT 系列开创的 **Decoder-Only** 架构。这意味着它�
 
 #### 2.1.1 设计思路
 
-标准的 Layer Normalization 在 Transformer 中用于稳定训练，但它的计算（减去均值、除以标准差）相对复杂。为了在保证性能的同时提升计算效率，Llama2 采用了它的变体 **RMSNorm (Root Mean Square Layer Normalization)**[^2]。
+标准的 Layer Normalization 在 Transformer 中用于稳定训练，但它的计算（减去均值、除以标准差）相对复杂。为了在保证性能的同时提升计算效率，Llama2 采用了它的变体 **RMSNorm（Root Mean Square Layer Normalization）** [^2]。
 
 其目的是 **简化归一化过程**：
-- **移除均值中心化**：只通过输入的均方根 (Root Mean Square) 对它进行缩放。
+- **移除均值中心化**：只通过输入的均方根（Root Mean Square）对它进行缩放。
 - **保留可学习增益**：依然保留一个可学习的 `weight` 参数 ($\gamma$)，用于在归一化后恢复模型的表达能力。
 
 公式如下，其中 $x$ 是输入向量， $\gamma$ 是可学习的缩放参数：
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
 我们在 Transformer 章节中已经知道，模型需要位置信息来理解词元的顺序。传统的位置编码（无论是固定的还是可学习的）是一种绝对位置编码，它为每个位置分配一个独立的向量。
 
-Llama2 则采用了更先进的 **旋转位置编码 (Rotary Positional Embedding, RoPE)**[^3]，它是一种**相对位置编码**。与传统位置编码通过**加法**直接注入词嵌入的方式不同，RoPE 的策略是：**位置信息不再是"加"到词嵌入上，而是在计算注意力时，通过复数"乘法"的方式"旋转"Query 和 Key 向量**。
+Llama2 则采用了更先进的 **旋转位置编码（Rotary Positional Embedding, RoPE）** [^3]，它是一种**相对位置编码**。与传统位置编码通过**加法**直接注入词嵌入的方式不同，RoPE 的策略是：**位置信息不再是"加"到词嵌入上，而是在计算注意力时，通过复数"乘法"的方式"旋转"Query 和 Key 向量**。
 
 <p align="center">
   <img src="./images/6_1_2.png" width="80%" alt="RoPE 旋转位置编码示意图" />
@@ -238,13 +238,13 @@ if __name__ == "__main__":
 
 #### 2.3.1 设计思路
 
-标准的**多头注意力 (Multi-Head Attention, MHA)** 为每个 Query 头都配备了一组独立的 Key 和 Value 头。这意味着 K 和 V 投影矩阵的尺寸以及推理时 KV 缓存的大小都与总头数 `n_heads` 成正比，当模型规模增大时，这部分开销变得非常显著。
+标准的**多头注意力（Multi-Head Attention, MHA）** 为每个 Query 头都配备了一组独立的 Key 和 Value 头。这意味着 K 和 V 投影矩阵的尺寸以及推理时 KV 缓存的大小都与总头数 `n_heads` 成正比，当模型规模增大时，这部分开销变得非常显著。
 
-**分组查询注意力 (Grouped-Query Attention, GQA)**[^4] 是对此的核心优化。其思路是：**允许多个 Query 头共享同一组 Key 和 Value 头**。
+**分组查询注意力（Grouped-Query Attention, GQA）**[^4] 是对此的核心优化。其思路是：**允许多个 Query 头共享同一组 Key 和 Value 头**。
 
-- **MHA**: 每个 Q 头都有自己的 K/V 头 (`n_heads` == `n_kv_heads`)。
-- **GQA**: 每组 Q 头共享一组 K/V 头 (`n_heads` > `n_kv_heads`)。
-- **MQA**: 所有 Q 头共享唯一的一组 K/V 头 (`n_kv_heads` = 1)，是 GQA 的特例。
+- **MHA**: 每个 Q 头都有自己的 K/V 头（`n_heads` == `n_kv_heads`）。
+- **GQA**: 每组 Q 头共享一组 K/V 头（`n_heads` > `n_kv_heads`）。
+- **MQA**: 所有 Q 头共享唯一的一组 K/V 头（`n_kv_heads` = 1），是 GQA 的特例。
 
 通过分组，GQA 在保持 MHA 大部分性能的同时，显著减少了 K/V 相关的计算量和显存占用，对加速模型推理至关重要。
 
@@ -356,7 +356,7 @@ if __name__ == "__main__":
 Transformer 中的前馈网络为模型提供了非线性计算能力，通常由两个线性层和一个 ReLU 激活函数构成。Llama2 采用了一种变体 **SwiGLU**[^5]，它被证明能带来更好的性能。
 
 它的核心是引入**门控机制**：
-- 它使用三个线性变换 (`W`, `V`, `W2`) 而不是两个。
+- 它使用三个线性变换（`W`, `V`, `W2`）而不是两个。
 - 第一个变换 `xW` 经过 Swish 激活函数（`swish(x) = x * sigmoid(x)`）。
 - 第二个变换 `xV` 作为“门”，与前一步的结果进行逐元素相乘。
 - 最后通过第三个变换 `W2` 输出。
@@ -545,10 +545,6 @@ logits shape: (2, 16, 1000)
 ```
 
 这个脚本实例化了一个小型的 `LlamaTransformer`，并用一个随机的 `tokens` 张量（代表一个批次、长度为16的两个句子）作为输入，执行了模型的前向传播，最终验证了输出 `logits` 的形状与 `[batch_size, seq_len, vocab_size]` 匹配。
-
-## 五、小结
-
-通过亲手实现这些组件，我们不仅复现了 Llama2 的主要逻辑，也更深刻地理解了它相较于原始 Transformer 的各项改进之处，为后续使用和微调大模型提供了一定理论基础。
 
 ---
 
