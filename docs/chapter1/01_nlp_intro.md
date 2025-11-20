@@ -51,7 +51,7 @@ NLP任务像一个金字塔，底层技术支撑着上层应用。一个复杂�
 NLP的发展并非一蹴而就，它经历了从符号主义到连接主义，从依赖专家规则到拥抱海量数据的深刻变革。
 
 <p align="center">
-  <img src="./images/1_1_1.gif" width="100%" alt="NLP的发展历程" />
+  <img src="./images/1_1_1.gif" width="80%" alt="NLP的发展历程" />
   <br />
   <em>图 1-1 NLP的发展历程</em>
 </p>
