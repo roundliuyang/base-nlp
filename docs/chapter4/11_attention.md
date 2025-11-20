@@ -113,9 +113,12 @@ $$
 
 最后，将这个拼接后的向量连同上一时刻的状态 $h^\prime_{t-1}$ 一起送入解码器的 RNN 单元，计算出当前时刻的状态 $h^\prime_{t}$，并基于 $h^\prime_{t}$ 预测出最有可能的输出词元 $y_t$。
 
-整个过程可以用下图来概括：
+整个过程可以通过图 4-2 来概括：
 
-![Attention 工作流程](./images/11_3_2.svg)
+<div align="center">
+  <img src="./images/4_2_1.svg" width="90%" alt="Attention 工作流程" />
+  <p>图 4-2 Attention 工作流程</p>
+</div>
 
 ### 3.3 一种高效的注意力打分函数
 

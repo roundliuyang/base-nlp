@@ -259,10 +259,11 @@ class MultiHeadSelfAttention(nn.Module):
 
 ## 三、Transformer 整体结构
 
-理解了自注意力和多头注意力之后，就可以从一个更高的视角来审视 Transformer 的整体结构了。它依然是一个 Encoder-Decoder 架构，但其内部是由几个标准化的“积木”堆叠而成的。
+理解了自注意力和多头注意力之后，就可以从一个更高的视角来审视 Transformer 的整体结构了。通过图 4-3 可以看出它依然是一个 Encoder-Decoder 架构，但其内部是由几个标准化的“积木”堆叠而成的。
 
 <div align="center">
-    <img src="./images/12_3.svg" alt="Transformer 架构" width="400">
+    <img src="./images/4_3_1.svg" width="60%" alt="Transformer 架构" />
+    <p>图 4-3 Transformer 架构</p>
 </div>
 
 Transformer 的 Encoder 和 Decoder 都是由 N 个（原论文中 N=6）功能相同的层 (Layer) 堆叠而成。下面我们分别来看它们的内部构造。
@@ -334,7 +335,7 @@ Transformer 的 Encoder 和 Decoder 都是由 N 个（原论文中 N=6）功能�
 为了让这些层能够成功地“堆叠”起来，每个子层的后面都连接了这个组合。
 
 -   **Add (残差连接)**：解决了深度网络的“模型退化”问题。从反向传播的角度看，子层的输出可以写成 $y = x + \text{Sublayer}(x)$。在计算梯度时， $\frac{\partial y}{\partial x} = 1 + \frac{\partial \text{Sublayer}(x)}{\partial x}$。其中“1”的存在为梯度创建了一条“高速公路”，确保无论网络有多深，梯度都能至少以大小为 1 的程度回传到最浅层，极大地稳定了训练过程。同时，这也要求模型中所有子层的输入和输出维度必须保持一致，以便进行元素相加。
--   **Norm (层归一化)**[^3]：用于稳定训练过程。它独立地对**每个样本的每个词元**的特征向量（即 `hidden_size` 维度）进行标准化，使其均值变为 0，方差变为 1（但这并不假设其原始分布为正态分布）。更重要的是，它引入了两个可学习的参数 $\gamma$（缩放）和 $\beta$（偏移），让模型可以自主学习最佳的数据分布，其完整公式为：
+-   **Norm (层归一化)** [^3]：用于稳定训练过程。它独立地对**每个样本的每个词元**的特征向量（即 `hidden_size` 维度）进行标准化，使其均值变为 0，方差变为 1（但这并不假设其原始分布为正态分布）。更重要的是，它引入了两个可学习的参数 $\gamma$（缩放）和 $\beta$（偏移），让模型可以自主学习最佳的数据分布，其完整公式为：
 
     $$
     y = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \cdot \gamma + \beta
