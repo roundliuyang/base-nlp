@@ -101,7 +101,7 @@ Word2Vec 通常被认为是一种**浅层神经网络模型（Shallow Neural Net
 
 由于One-Hot向量只有一个位置是1，这个矩阵乘法的结果，等效于直接从矩阵 $W_{in}$ 中 **“抽取”出索引为 3 的那一行**。
 
-```math
+$$
 \begin{bmatrix} 0 & 0 & 0 & \color{#42b983}{1} & 0 & 0 \end{bmatrix}
 \times
 \begin{bmatrix}
@@ -114,7 +114,7 @@ Word2Vec 通常被认为是一种**浅层神经网络模型（Shallow Neural Net
 \end{bmatrix}
 =
 \begin{bmatrix} \color{#42b983}{5} & \color{#42b983}{6} & \color{#42b983}{2} & \color{#42b983}{9} & \color{#42b983}{4} \end{bmatrix}
-```
+$$
 
 在实践中，为了极大地提升效率，程序并不会真的执行稀疏的矩阵乘法，而是直接实现一个 **查询** 操作：根据输入的单词ID，直接从 $W_{in}$ 矩阵中获取对应的行向量。理解这里的关键在于，这个参数矩阵 $W_{in}$ **本身就是学习的目标**。它被随机初始化，并在后续的训练过程中，通过CBOW或Skip-gram这样的 **预测任务** 不断地被优化和调整。
 
@@ -261,7 +261,7 @@ $$
 
 ## 练习
 
-- 根据已经学过的内容使用 `20newsgroups` 数据（from sklearn.datasets import fetch_20newsgroups）实现基于全连接的文本分类模型训练和推理代码（若自行实现困难，可以参考[文本分类简单实现](https://github.com/datawhalechina/base-nlp/blob/main/docs/chapter7/01_text_classification.md)）
+- 根据已经学过的内容使用 `20newsgroups` 数据（from sklearn.datasets import fetch_20newsgroups）实现基于全连接的文本分类模型训练和推理代码（若自行实现困难，可以参考[基于 LSTM 的文本分类](https://github.com/datawhalechina/base-nlp/blob/main/docs/chapter7/02_lstm_text_classification.md)）
 
 ---
 

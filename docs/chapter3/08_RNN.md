@@ -49,9 +49,12 @@ RNN 的思路是在处理序列的每一步时，网络不仅接收当前时间�
 
 ### 2.1 RNN 结构
 
-下图展示了 RNN 单元在单个时间步内的计算流程。需要注意，为了可视化，此图将隐藏状态拆分成了两个部分（`Hidden State` 和 `Hidden Layer`），但在计算上它们是紧密关联的。
+如图 3-1 展示了 RNN 单元在单个时间步内的计算流程。需要注意，为了可视化，此图将隐藏状态拆分成了两个部分（`Hidden State` 和 `Hidden Layer`），但在计算上它们是紧密关联的。
 
-![RNN 单元结构](./images/8_2_1.svg)
+<div align="center">
+  <img src="./images/3_1_1.svg" width="70%" alt="RNN 单元结构" />
+  <p>图 3-1 RNN 单元结构</p>
+</div>
 
 可以将图中的流程分解如下，并与公式 $h_t = \tanh(U x_t + W h_{t-1} + b)$ 对应起来：
 
