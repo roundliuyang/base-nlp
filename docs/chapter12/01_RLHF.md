@@ -9,10 +9,10 @@
 
 为了跨越从“遵循指令”到“理解偏好”的鸿沟，我们需要一种新的训练范式。**基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）** 正是解决这一问题的关键技术。它的核心目标就是让模型超越简单的模仿学习，真正理解并内化人类复杂的价值观，使其输出更符合我们的期望。
 
-如图 12-1 所示，在 InstructGPT 的研究中[^1]，经过 RLHF 对齐后，仅有 13 亿参数的模型，在人类评估中的表现甚至超过了 1750 亿参数的原始 GPT-3 模型。
+如图 12-1 所示，在 InstructGPT 的研究中 [^1]，经过 RLHF 对齐后，仅有 13 亿参数的模型，在人类评估中的表现甚至超过了 1750 亿参数的原始 GPT-3 模型。
 
 <p align="center">
-  <img src="./images/12_1_1.png" width="70%" alt="InstructGPT 模型与 GPT-3 的人类偏好对比" />
+  <img src="./images/12_1_1.png" width="60%" alt="InstructGPT 模型与 GPT-3 的人类偏好对比" />
   <br />
   <em>图 12-1 InstructGPT 与 GPT-3 人类偏好对比</em>
 </p>
@@ -67,7 +67,7 @@
 如图 12-2 所示，RLHF 的流程主要包含三个核心步骤。首先通过有监督微调得到初始策略模型；然后，收集人类偏好数据训练一个奖励模型；最后，使用奖励模型作为信号，通过强化学习算法（如 PPO）进一步优化策略模型。
 
 <p align="center">
-  <img src="./images/12_1_2.png" width="80%" alt="RLHF 经典三步法示意图" />
+  <img src="./images/12_1_2.png" width="70%" alt="RLHF 经典三步法示意图" />
   <br />
   <em>图 12-2 RLHF 经典三步法示意图</em>
 </p>
@@ -112,7 +112,7 @@
 
 #### 3.2.1 PPO 与“对齐税”
 
-**近端策略优化（Proximal Policy Optimization, PPO）** 是 RLHF 中最经典的算法[^2]。PPO 的主要思路是，在尝试最大化奖励的同时，通过一个约束项来限制新旧策略的差异范围，继而避免单步更新过大导致训练崩溃。它通过优化一个“替代目标函数”（Surrogate Objective）来实现这一点。PPO 最常用的替代目标是 **Clipped Surrogate Objective**:
+**近端策略优化（Proximal Policy Optimization, PPO）** 是 RLHF 中最经典的算法 [^2]。PPO 的主要思路是，在尝试最大化奖励的同时，通过一个约束项来限制新旧策略的差异范围，继而避免单步更新过大导致训练崩溃。它通过优化一个“替代目标函数”（Surrogate Objective）来实现这一点。PPO 最常用的替代目标是 **Clipped Surrogate Objective**:
 
 $$
 L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right) \right]
@@ -123,7 +123,7 @@ $$
 如图 12-3 是 PPO 裁剪代理目标函数 $L^{CLIP}$ 的单步示意图。当优势 $\hat{A}_t>0$ 时（左），目标函数随概率比 $r_t(\theta)$ 的增加而增加，但增长被限制在 $1+\epsilon$ 处；当 $\hat{A}_t<0$ 时（右），目标函数随 $r_t(\theta)$ 的增加而减小，但减小幅度被限制在 $1-\epsilon$ 处，从而约束了策略更新的步长。
 
 <p align="center">
-  <img src="./images/12_1_3.png" width="80%" alt="PPO 的裁剪代理目标函数" />
+  <img src="./images/12_1_3.png" width="60%" alt="PPO 的裁剪代理目标函数" />
   <br />
   <em>图 12-3 PPO 的裁剪代理目标函数</em>
 </p>
@@ -146,7 +146,7 @@ $$
 通过图 12-4 可以看到 PPO-ptx 缓解了 RLHF 在部分公开 NLP 数据集上的性能下降（对齐税）问题。图中 PPO-ptx 模型（红色）代表混合了预训练梯度，而 PPO 模型（橙色）则没有。在 SQuADv2、DROP 等多个任务上，PPO-ptx 的性能显著优于单纯的 PPO。
 
 <p align="center">
-  <img src="./images/12_1_4.png" width="90%" alt="PPO-ptx 缓解对齐税" />
+  <img src="./images/12_1_4.png" width="60%" alt="PPO-ptx 缓解对齐税" />
   <br />
   <em>图 12-4 PPO-ptx 缓解对齐税</em>
 </p>
@@ -176,7 +176,7 @@ $$
 如图 12-5，该图展示了在 IMDb 情感生成任务中，不同偏好学习算法的 Reward-KL 效率前沿。DPO（黄色散点）在所有 KL 散度值上都获得了最高的期望奖励，表明 DPO 能够更有效地在最大化奖励和与参考模型的 KL 散度约束之间进行权衡，其优化效果优于 PPO 等基线方法。
 
 <p align="center">
-  <img src="./images/12_1_5.png" width="80%" alt="DPO 与 PPO 的 Reward-KL 效率前沿对比" />
+  <img src="./images/12_1_5.png" width="60%" alt="DPO 与 PPO 的 Reward-KL 效率前沿对比" />
   <br />
   <em>图 12-5 DPO 与 PPO 的 Reward-KL 效率前沿对比</em>
 </p>
@@ -192,7 +192,7 @@ $$
 以 InstructGPT 为例，RLHF 带来了显著且复杂的影响：
 
 <p align="center">
-  <img src="./images/12_1_6.png" width="70%" alt="InstructGPT 在 TruthfulQA 上的真实性表现" />
+  <img src="./images/12_1_6.png" width="60%" alt="InstructGPT 在 TruthfulQA 上的真实性表现" />
   <br />
   <em>图 12-6 InstructGPT 在 TruthfulQA 上的真实性表现</em>
 </p>
@@ -233,7 +233,7 @@ RLHF 是一项开创性的技术，它成功地将复杂的强化学习与大语
 
 ## 参考文献
 
-[^1]: [Ouyang, L., Wu, J., et al. (2022). *Training language models to follow instructions with human feedback*. Advances in Neural Information Processing Systems.](https://proceedings.neurips.cc/paper_files/paper/2022/hash/b1efde53be364a73914f58805a001731-Abstract-Conference.html)
+[^1]: [Ouyang, L., Wu, J., et al. (2022). *Training language models to follow instructions with human feedback*. Advances in Neural Information Processing Systems.](https://arxiv.org/abs/2203.02155)
 
 [^2]: [Schulman, J., Wolski, F., et al. (2017). *Proximal policy optimization algorithms*. arXiv preprint arXiv:1707.06347.](https://arxiv.org/abs/1707.06347)
 

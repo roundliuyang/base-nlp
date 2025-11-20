@@ -130,7 +130,7 @@ Word2Vec包含两种具体的实现模型：CBOW 和 Skip-gram。两者在任务
 如图 2-3，CBOW（Continuous Bag-of-Words）的任务是 **“根据上下文预测中心词”**。
 
 <p align="center">
-  <img src="./images/2_3_2.svg" width="80%" alt="CBOW" />
+  <img src="./images/2_3_2.svg" width="60%" alt="CBOW" />
   <br />
   <em>图 2-3 CBOW</em>
 </p>
