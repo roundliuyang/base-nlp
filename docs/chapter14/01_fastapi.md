@@ -57,7 +57,7 @@ INFO:     Application startup complete.
 
 接下来，在服务仍在运行的情况下，打开浏览器访问 `http://127.0.0.1:8000/docs`。
 
-我们会看到一个由 Swagger UI 生成的、功能齐全的交互式 API 文档页面。
+我们会看到一个由 Swagger UI 生成的、功能齐全的交互式 API 文档页面。如图 14-1，在这个页面中，可以查看所有的 API 端点（Endpoints）、参数和返回结构，并直接进行调用和测试。点击右上角的 “Try it out” 按钮，然后再点击蓝色的 “Execute” 按钮，页面下方会立即显示出 API 的执行结果。
 
 <p align="center">
   <img src="./images/14_1_1.png" width="80%" alt="FastAPI 自动生成的交互式 API 文档" />
@@ -65,7 +65,7 @@ INFO:     Application startup complete.
   <em>图 14-1 FastAPI 自动生成的交互式 API 文档</em>
 </p>
 
-如图 14-1，在这个页面中，可以查看所有的 API 端点（Endpoints）、参数和返回结构，并直接进行调用和测试。点击右上角的 “Try it out” 按钮，然后再点击蓝色的 “Execute” 按钮，页面下方会立即显示出 API 的执行结果。
+如图 14-2，返回的结果中甚至包含了可以直接使用的 `curl` 命令、请求 URL、服务器响应内容和响应头。这种所见即所得的调试方式能够大大提高开发效率。
 
 <p align="center">
   <img src="./images/14_1_2.png" width="80%" alt="在 FastAPI 文档中执行 API" />
@@ -73,9 +73,7 @@ INFO:     Application startup complete.
   <em>图 14-2 在 FastAPI 文档中执行 API</em>
 </p>
 
-如图 14-2，返回的结果中甚至包含了可以直接使用的 `curl` 命令、请求 URL、服务器响应内容和响应头。这种所见即所得的调试方式能够大大提高开发效率。
-
-除此之外，FastAPI 还有另一个由 ReDoc 生成的文档地址 `http://127.0.0.1:8000/redoc`，提供了另一种风格的文档。
+除此之外，FastAPI 还有另一个由 ReDoc 生成的文档地址 `http://127.0.0.1:8000/redoc`，提供了另一种风格的文档。如图 14-3 所示，ReDoc 提供了更加紧凑和文档化的视图，适合阅读和理解 API 的整体结构。
 
 <p align="center">
   <img src="./images/14_1_3.png" width="80%" alt="由 ReDoc 生成的 API 文档" />
@@ -83,7 +81,7 @@ INFO:     Application startup complete.
   <em>图 14-3 由 ReDoc 生成的 API 文档</em>
 </p>
 
-如图 14-3 所示，ReDoc 提供了更加紧凑和文档化的视图，适合阅读和理解 API 的整体结构。在界面顶部可以看到有个 “Download” 按钮，能够直接下载 `openapi.json` 文件。这份文件非常有用，因为它可以被许多第三方工具使用，例如：
+在界面顶部可以看到有个 “Download” 按钮，能够直接下载 `openapi.json` 文件。这份文件非常有用，因为它可以被许多第三方工具使用，例如：
 
 - **客户端代码生成器**：自动生成用于调用 API 的多种语言（如 TypeScript、Java）的客户端代码。
 - **API 测试工具**：如 Postman，可以直接导入规范文件，一键创建所有 API 的测试集合。
