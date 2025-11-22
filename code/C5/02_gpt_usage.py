@@ -2,11 +2,11 @@ import torch
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-# --- 1. 环境和模型配置 ---
+# 1. 环境和模型配置
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_name = "gpt2"
 
-# --- 2. 加载模型和分词器 ---
+# 2. 加载模型和分词器 ---
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 model.eval()
