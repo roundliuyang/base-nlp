@@ -79,7 +79,9 @@ Hugging Face 的生态系统可以看作是由**核心软件库**、**协作平�
 
 ### 2.3 核心组件拆解
 
-以下代码演示了一个标准的 Transformers 处理流程。
+Transformers 的处理流程主要包含三个核心阶段。我们将结合代码演示，分析每个阶段的职责与实现：
+
+**1. 分词**
 
 ```python
 import torch
@@ -89,12 +91,13 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 checkpoint = "bert-base-chinese"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
-
 # 1. Tokenizer: 文本 -> Tensor
 text = "Hugging Face 让 NLP 变得简单"
 inputs = tokenizer(text, return_tensors="pt")
 inputs['input_ids']
 ```
+
+Tokenizer 充当数据的“翻译官”，负责将原始文本转换为模型可理解的数字序列（如 Input IDs 和 Attention Mask）。它利用 Rust 实现的 Fast Tokenizer 技术，在处理海量语料时比纯 Python 实现快几个数量级。
 
 输出：
 ```bash
@@ -110,11 +113,15 @@ tensor([[ 101,  100,  100, 6375,  100, 1359, 2533, 5042, 1296,  102]])
 *   `5042`: "简"
 *   `1296`: "单"
 
+**2. 模型**
+
 ```python
 # 2. Model: Tensor -> Logits
 outputs = model(**inputs)
 logits = outputs.logits
 ```
+
+模型是计算的“引擎”，由 `Config`（架构定义）和 `Weights`（参数权重）组成。它接收 Token IDs，执行前向传播，最终输出隐藏状态（Hidden States）或 Logits。
 
 输出：
 ```bash
@@ -123,11 +130,15 @@ tensor([[0.2436, 0.1208]], grad_fn=<AddmmBackward0>)
 
 模型输出的 `logits` 是未归一化的数值。可以看到输出是一个 `[1, 2]` 的张量，在一个二分类任务中通常可以理解为两个类别（例如“负面/正面”）的原始得分。这里我们主要演示前向推理流程；在实际应用中，需要在标注数据上对模型进行微调（或直接加载已经在下游任务上微调好的权重），这两个维度才会对应具体语义的类别标签。
 
+**3. 后处理**
+
 ```python
 # 3. Post-processing: Logits -> 概率
 predictions = torch.nn.functional.softmax(logits, dim=-1)
-print(f"Predictions: {predictions}")
+predictions
 ```
+
+后处理阶段的职责是将模型输出的 Logits 转换为人类可读的概率或标签。
 
 输出：
 ```bash
@@ -135,19 +146,6 @@ tensor([[0.5306, 0.4694]], grad_fn=<SoftmaxBackward0>)
 ```
 
 经过 Softmax 层后，logits 被转换为概率分布（和为 1）。此例中，第一个类别的概率约为 53%，第二个类别约为 47%。
-
-通过上述代码我们可以了解到 Transformers 处理数据的三个核心阶段：
-
-1.  **Tokenizer (分词)**：
-    *   **职责**：数据的“翻译官”。将原始文本转换为模型可理解的数字序列（Input IDs, Attention Mask）。
-    *   **特点**：利用 Rust 实现的 Fast Tokenizer，在处理海量语料时比纯 Python 实现快几个数量级。
-
-2.  **Model (模型)**：
-    *   **职责**：计算的“引擎”。接收 Token IDs，执行前向传播，输出隐藏状态（Hidden States）或 Logits。
-    *   **结构**：由 `Config`（架构定义）和 `Weights`（参数权重）组成。
-
-3.  **Post-processing (后处理)**：
-    *   **职责**：将模型输出的 Logits 转换为人类可读的概率或标签。
 
 ## 三、使用 Datasets 构建数据流水线
 
@@ -211,9 +209,8 @@ def tokenize_function(examples):
 虽然可以手写 PyTorch 循环，但 `Trainer` 集成了大量工程化特性（如混合精度、梯度累积、分布式训练支持），且底层自动调用 `Accelerate` 库。
 
 使用 Trainer 通常遵循“三步走”：
-1.  **准备组件**：实例化 Model、Dataset 和 Tokenizer。
-2.  **配置参数**：使用 `TrainingArguments` 定义超参数（Batch Size, LR, Epoch, 保存策略等）。
-3.  **启动训练**：实例化 `Trainer` 并调用 `.train()`。
+
+**1. 准备组件**
 
 ```python
 from transformers import TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoTokenizer
@@ -235,6 +232,8 @@ model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-unca
 
 model
 ```
+
+可以看到第一步我们实例化了 Model、Dataset 和 Tokenizer 等核心组件。
 
 输出：
 ```bash
@@ -273,6 +272,8 @@ DistilBertForSequenceClassification(
 
 打印模型对象可以看到其完整的网络结构。注意最后的 `classifier` 层，其 `out_features=2` 对应我们在加载时设置的 `num_labels=2`，这表明模型已经被正确初始化为二分类任务。
 
+**2. 配置参数**
+
 ```python
 # 2. 配置参数
 training_args = TrainingArguments(
@@ -280,7 +281,13 @@ training_args = TrainingArguments(
     eval_strategy="epoch", # 每个 epoch 结束进行评估
     num_train_epochs=1,
 )
+```
 
+使用 `TrainingArguments` 定义超参数（Batch Size, LR, Epoch, 保存策略等）。
+
+**3. 启动训练**
+
+```python
 # 3. 实例化 Trainer 并启动训练
 trainer = Trainer(
     model=model,
@@ -290,6 +297,8 @@ trainer = Trainer(
 )
 trainer.train()
 ```
+
+实例化 `Trainer` 并调用 `train()` 即可开启训练流程。
 
 ### 4.2 Evaluate 性能评估
 
