@@ -84,7 +84,7 @@ Google Brain 团队（包括 Geoffrey Hinton 和 Jeff Dean 等）于 2017 年发
 - **LSTM + MoE 架构**：如图 6-3 所示，研究者将 MoE 层嵌入到堆叠的 LSTM 层之间。左侧展示了该层被卷积式地应用于每个时间步；右侧细节显示，MoE 层接收前一层的输入，通过门控网络（绿色框）计算稀疏权重，仅激活少数专家（灰色框）参与计算，其余专家（白色框）保持闲置。各专家的输出经加权求和后，传递给下一层。对于输入序列中的每一个位置（Token），MoE 都会动态选择不同的专家组合进行处理。
 
 <p align="center">
-  <img src="./images/6_2_1.png" width="80%" alt="LSTM + MoE 架构图" />
+  <img src="./images/6_2_1.png" width="70%" alt="LSTM + MoE 架构图" />
   <br />
   <em>图 6-3：稀疏门控 MoE 层的架构示意图</em>
 </p>
@@ -101,7 +101,7 @@ Google Brain 团队（包括 Geoffrey Hinton 和 Jeff Dean 等）于 2017 年发
     如图 6-4 这种稀疏性带来了巨大的收益。在保持计算预算（每步约 800 万次运算）基本不变的情况下，随着专家数量从 4 个增加到 4096 个（横轴，模型参数量随之剧增），测试集困惑度（纵轴，越低越好）显著下降。这有力地证明了条件计算可以在不增加推理成本的前提下，利用海量参数大幅提升模型性能。
 
     <p align="center">
-       <img src="./images/6_2_2.png" width="60%" alt="模型容量与效果对比图" />
+       <img src="./images/6_2_2.png" width="50%" alt="模型容量与效果对比图" />
        <br />
        <em>图 6-4：模型容量与测试集困惑度的关系</em>
     </p>
@@ -161,7 +161,7 @@ $$ \mathbf{E}_i(\mathbf{x}) = \mathbf{W}_{out} \cdot \text{ReLU}(\mathbf{W}_{in}
     如图 6-5 所示，这一架构设计清晰地展示了从标准 Transformer 到分布式 MoE 的演进。(a) 标准 Transformer 编码器堆叠了 Self-Attention 和 FFN 层；(b) MoE Transformer 将每隔一个 FFN 层替换为 MoE 层；(c) 在跨设备扩展时，Attention 层（黄色）在所有设备间复制，而 MoE 层（红色）则被分片存储。这种“复制与分片”结合的策略，既保证了非 MoE 层的高效计算，又通过分片突破了单设备的显存限制。
 
     <p align="center">
-      <img src="./images/6_2_3.png" width="90%" alt="GShard MoE Transformer Encoder 架构图" />
+      <img src="./images/6_2_3.png" width="80%" alt="GShard MoE Transformer Encoder 架构图" />
       <br />
       <em>图 6-5：GShard MoE Transformer Encoder 架构与并行策略</em>
     </p>
@@ -264,7 +264,7 @@ Switch Transformer 的主要创新在于提出了 **Switch Layer**。如图 6-6 
 虽然直觉上 $k=1$ 可能限制了专家的协作，但实验证明这种简化不仅保持了模型质量，还显著提高了计算效率。
 
 <p align="center">
-  <img src="./images/6_2_4.png" width="90%" alt="Switch Transformer Encoder 架构图" />
+  <img src="./images/6_2_4.png" width="80%" alt="Switch Transformer Encoder 架构图" />
   <br />
   <em>图 6-6：Switch Transformer Encoder 架构图</em>
 </p>
@@ -329,7 +329,7 @@ GLaM 将参数规模推向了 **1.2 万亿**，是 GPT-3（175B）的 7 倍。�
     在 MoE 层中，Gating 模块会根据输入 Token（例如 "roses"）的特性，从 64 个专家中动态选择出**最相关**的 2 个专家（蓝色网格所示）。随后，这两个专家的输出经过加权平均后，传递给下一层的 Transformer 模块。这种机制确保了模型在拥有巨大参数量的同时，每次推理仅需激活极少部分的参数。
 
     <p align="center">
-      <img src="./images/6_2_6.png" width="50%" alt="GLaM 模型架构图" />
+      <img src="./images/6_2_6.png" width="40%" alt="GLaM 模型架构图" />
       <br />
       <em>图 6-8：GLaM 模型架构图</em>
     </p>
@@ -470,7 +470,7 @@ DeepSeek 在 MoE 架构上进行了更深度的创新，提出了 **DeepSeekMoE*
     其中 $\mathcal{S}$ 代表**共享专家**集合（总是被激活），$\mathcal{R}$ 代表**路由专家**集合（仅选择性激活）。这种双路径结构是其区别于传统 MoE（公式 6.4）的关键。
 
     <p align="center">
-      <img src="./images/6_2_11.png" width="100%" alt="DeepSeekMoE 架构图" />
+      <img src="./images/6_2_11.png" width="80%" alt="DeepSeekMoE 架构图" />
       <br />
       <em>图 6-13：DeepSeekMoE 架构演进：(a) 传统 Top-2 路由; (b) 细粒度专家分割; (c) 细粒度 + 共享专家隔离（最终架构）</em>
     </p>
