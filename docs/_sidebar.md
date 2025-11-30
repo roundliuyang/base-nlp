@@ -20,6 +20,7 @@
         - [Hugging Face 生态与核心库](chapter5/16_HuggingFace.md)
     - **第6章：深入大模型架构**
         - [手搓一个大模型](chapter6/17_handcraft_llama2.md)
+        - [MoE 架构解析](chapter6/18_MoE.md)
 
 - **第二部分：实战篇**
     - **第1章：文本分类**
