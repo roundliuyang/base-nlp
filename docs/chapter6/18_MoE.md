@@ -12,7 +12,7 @@
 
 #### 1.1.1 干扰效应与分治思想
 
-在传统的单体神经网络中，如果我们尝试让一个网络同时学习多个截然不同的子任务（例如既学做菜又学修车），往往会出现“**强干扰效应（Strong Interference Effects）**”。这是因为网络的所有权重都参与了所有任务的计算，当网络调整参数以适应任务 A 时，可能会破坏它在任务 B 上已经学到的特征表示。从而导致学习速度变慢，泛化能力变差。
+在传统的单体神经网络中，如果我们尝试让一个网络同时学习多个截然不同的子任务（例如既学做菜又学修车），往往会出现 **“强干扰效应（Strong Interference Effects）”**。这是因为网络的所有权重都参与了所有任务的计算，当网络调整参数以适应任务 A 时，可能会破坏它在任务 B 上已经学到的特征表示。从而导致学习速度变慢，泛化能力变差。
 
 为了解决这个问题，论文提出了一种基于 **“分治（Divide and Conquer）”** 策略的系统架构：
 
@@ -467,7 +467,7 @@ DeepSeek 在 MoE 架构上进行了更深度的创新，提出了 **DeepSeekMoE*
 
 #### 3.2.2 性能里程碑
 
-DeepSeek-R1 不仅在常规任务上表现出色，更通过**大规模强化学习** 具备了强大的逻辑推理能力。
+DeepSeek-R1 不仅在常规任务上表现出色，更通过**大规模强化学习**具备了强大的逻辑推理能力。
 
 DeepSeek-R1 在 AIME 2024（数学竞赛）上 Pass@1 准确率达到 79.8%，稍高于 OpenAI-o1-1217；在 MATH-500 上达到 97.3%，与 o1 持平。在 Codeforces 编程竞赛中，其 Elo 等级分达到 2029，超过了 96.3% 的人类参赛者。如图 6-14 所示，DeepSeek-R1（深蓝色柱状图）在多个推理密集型基准测试中均展现出了与顶尖闭源模型（如 OpenAI-o1-1217，灰色柱状图）分庭抗礼的实力。
 
@@ -476,6 +476,126 @@ DeepSeek-R1 在 AIME 2024（数学竞赛）上 Pass@1 准确率达到 79.8%，�
   <br />
   <em>图 6-14：DeepSeek-R1 在数学、代码及知识类基准测试上的性能表现</em>
 </p>
+
+## 四、MoE 代码实战
+
+接下来，让我们基于上节实现的 Llama2 的代码，将标准的稠密 FFN 层替换为 MoE 层，从而实现一个简单的 MoE 模型。只需要对原有代码进行两处修改。首先在 `src/ffn.py` 中新增一个包含门控网络和多专家的 `MoE` 类，随后在 `src/transformer.py` 中用这个新类替换掉原有的 `FeedForward` 层。而模型的其他核心组件（如 Attention, RoPE, Norm 等）保持不变。下面来逐一实现。
+
+如图 6-15 在 Transformer Block 中（紫色区域）引入了 Router 和 Experts，这就组成了我们的 **Llama2 + MoE** 架构。
+
+<p align="center">
+  <img src="./images/6_2_13.svg" width="60%" alt="Llama2 + MoE 架构图" />
+  <br />
+  <em>图 6-15：Llama2 + MoE 架构图</em>
+</p>
+
+> [本节完整代码](https://github.com/datawhalechina/base-nlp/tree/main/code/C6/MoE)
+
+### 4.1 实现 MoE 层
+
+我们在 `src/ffn.py` 中原有的 `FeedForward` 类下方，新增一个 `MoE` 类。
+
+```python
+# code/C6/MoE/src/ffn.py
+# ... (保留原有的 FeedForward 类)
+
+class MoE(nn.Module):
+    def __init__(self, dim: int, hidden_dim: int, multiple_of: int, ffn_dim_multiplier: Optional[float], num_experts: int = 8, top_k: int = 2):
+        super().__init__()
+        self.num_experts = num_experts
+        self.top_k = top_k
+        # 门控网络：决定每个 Token 去往哪个专家
+        self.gate = nn.Linear(dim, num_experts, bias=False)
+        # 专家列表：创建 num_experts 个独立的 FeedForward 网络
+        self.experts = nn.ModuleList([
+            FeedForward(dim, hidden_dim, multiple_of, ffn_dim_multiplier)
+            for _ in range(num_experts)
+        ])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (batch_size, seq_len, dim)
+        B, T, D = x.shape
+        x_flat = x.view(-1, D)
+        
+        # 1. 门控网络
+        gate_logits = self.gate(x_flat) # (B*T, num_experts)
+        # 2. Top-k 路由
+        weights, indices = torch.topk(gate_logits, self.top_k, dim=-1)
+        weights = F.softmax(weights, dim=-1) # 归一化权重
+        
+        output = torch.zeros_like(x_flat)
+        
+        for i, expert in enumerate(self.experts):
+            # 3. 找出所有选中当前专家 i 的 token 索引
+            batch_idx, k_idx = torch.where(indices == i)
+            
+            if len(batch_idx) == 0:
+                continue
+                
+            # 4. 取出对应的输入进行计算
+            expert_input = x_flat[batch_idx]
+            expert_out = expert(expert_input)
+            
+            # 5. 获取对应的权重
+            expert_weights = weights[batch_idx, k_idx].unsqueeze(-1) # (num_selected, 1)
+            
+            # 6. 将结果加权累加回输出张量
+            output.index_add_(0, batch_idx, expert_out * expert_weights)
+            
+        return output.view(B, T, D)
+```
+
+这个实现虽然是循环处理，不如 CUDA Kernel 高效，但逻辑非常清晰：
+
+-  **Gate（门控）**: 通过 `self.gate(x_flat)` 计算每个 Token 对所有 8 个专家的打分（Logits）。
+-  **Top-k（路由）**: 使用 `torch.topk` 选出每个 Token 分数最高的 `k=2` 个专家及其索引。并通过 `Softmax` 对这 k 个权重进行归一化，确保它们的和为 1。
+-  **Dispatch（分发与计算）**: 这是 MoE 的核心。我们遍历每一个专家：
+    -   通过 `torch.where` 找出所有被分配给当前专家的 Token 索引。
+    -   将这些 Token 挑选出来（Index Select），送入对应的 `expert` 网络（即一个 SwiGLU FFN）进行计算。
+-  **Combine（加权聚合）**: 专家的输出并不是直接作为最终结果。我们需要将专家的输出乘以对应的门控权重（Weight），然后通过 `index_add_` 累加回输出张量 `output` 的对应位置。
+
+这样，每个 Token 最终的输出就是它所激活的 2 个专家输出的加权和。
+
+### 4.2 替换 TransformerBlock
+
+接下来修改 `src/transformer.py`，引入我们刚写的 `MoE` 类，并替换掉原来的 `FeedForward`。
+
+```python
+# code/C6/MoE/src/transformer.py
+# ...
+from .ffn import FeedForward, MoE # 导入 MoE
+
+class TransformerBlock(nn.Module):
+    def __init__(
+        # ... args ...
+    ):
+        super().__init__()
+        # ...
+        
+        # 修改：使用 MoE 替换标准的 FeedForward
+        self.feed_forward = MoE(
+            dim=dim,
+            hidden_dim=4 * dim,
+            multiple_of=multiple_of,
+            ffn_dim_multiplier=ffn_dim_multiplier,
+            num_experts=8,  # 定义8个专家
+            top_k=2,        # 每个Token激活2个专家
+        )
+        # ...
+```
+
+这里我们将专家数设为 8，Top-k 设为 2，刚好是 Mistral 8x7B 的经典配置。
+
+### 4.3 运行验证
+
+最后，我们不需要修改 `main.py` 中的任何逻辑，直接运行即可。因为对于外部调用者来说，`LlamaTransformer` 的接口（输入输出形状）没有任何变化，MoE 的复杂性被完全封装在了层内部。运行后，如果看到下面的输出，说明我们的 MoE 模型已经成功跑通了。
+
+输出：
+```bash
+logits shape: (2, 16, 1000)
+```
+
+通过这不到 50 行代码的修改，我们就把一个标准的 Llama2 改进成了一个具备**稀疏激活**能力的 MoE 模型。这种能够作为通用、可插拔组件无缝集成到现有 Transformer 架构中的特性，也正是 MoE 架构优雅之处的体现。
 
 ---
 
