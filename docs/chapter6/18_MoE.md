@@ -484,7 +484,7 @@ DeepSeek-R1 在 AIME 2024（数学竞赛）上 Pass@1 准确率达到 79.8%，�
 如图 6-15 在 Transformer Block 中（紫色区域）引入了 Router 和 Experts，这就组成了我们的 **Llama2 + MoE** 架构。
 
 <p align="center">
-  <img src="./images/6_2_13.svg" width="60%" alt="Llama2 + MoE 架构图" />
+  <img src="./images/6_2_13.svg" width="40%" alt="Llama2 + MoE 架构图" />
   <br />
   <em>图 6-15：Llama2 + MoE 架构图</em>
 </p>
