@@ -123,8 +123,8 @@
     - [x] [RLHF 技术详解](./chapter12/01_rlhf.md)
     - [x] [LLaMA-Factory RLHF（DPO）实战](./chapter12/02_llama_factory.md)
 - **第3章：大模型训练与量化**
-    - [ ] [Deepspeed 框架介绍](./chapter12/01_deepspeed.md)
-    - [ ] [AWQ 模型量化实战](./chapter12/02_awg.md)
+    - [ ] [Deepspeed 框架介绍](./chapter13/01_deepspeed.md)
+    - [ ] [AWQ 模型量化实战](./chapter13/02_awg.md)
 
 ### 第四部分：应用部署篇
 - **第1章：模型服务部署**

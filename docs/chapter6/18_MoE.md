@@ -479,7 +479,7 @@ DeepSeek-R1 在 AIME 2024（数学竞赛）上 Pass@1 准确率达到 79.8%，�
 
 接下来，让我们基于上节实现的 Llama2 的代码，将标准的稠密 FFN 层替换为 MoE 层，从而实现一个简单的 MoE 模型。只需要对原有代码进行两处修改。首先在 `src/ffn.py` 中新增一个包含门控网络和多专家的 `MoE` 类，随后在 `src/transformer.py` 中用这个新类替换掉原有的 `FeedForward` 层。而模型的其他核心组件（如 Attention, RoPE, Norm 等）保持不变。下面来逐一实现。
 
-如图 6-15 在 Transformer Block 中（紫色区域）引入了 Router 和 Experts，这就组成了我们的 **Llama2 + MoE** 架构。
+如图 6-15 在 Transformer Block 中（紫色区域）引入了 Router 和 Experts，这就组成了我们的 **Llama2 + MoE** 架构。输入经过 RMS Norm 后，进入 MoE 层。Router 根据输入计算每个 Expert 的权重，并选择 Top-k 个 Expert。选中的 Expert 并行处理输入，最后将各 Expert 的输出加权求和，作为 MoE 层的最终输出。
 
 <p align="center">
   <img src="./images/6_2_13.svg" width="40%" alt="Llama2 + MoE 架构图" />
