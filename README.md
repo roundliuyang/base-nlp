@@ -79,63 +79,65 @@
 ## 内容大纲
 
 ### 第一部分：理论篇
-- **第1章：NLP简介**
+- **第 1 章：NLP简介**
     - [x] [NLP 概述](./docs/chapter1/01_nlp_intro.md)
-- **第2章：文本表示与词向量**
+- **第 2 章：文本表示与词向量**
     - [x] [初级分词技术](./docs/chapter2/03_tokenization.md)
     - [x] [词向量表示](./docs/chapter2/04_word_vector.md)
     - [x] [从主题模型到 Word2Vec](./docs/chapter2/05_Word2Vec.md)
     - [x] [基于 Gensim 的词向量实战](./docs/chapter2/06_gensim.md)
-- **第3章：循环神经网络**
+- **第 3 章：循环神经网络**
     - [x] [循环神经网络](./docs/chapter3/08_RNN.md)
     - [x] [LSTM 与 GRU](./docs/chapter3/09_LSTM&GRU.md)
-- **第4章：注意力机制与Transformer**
+- **第 4 章：注意力机制与Transformer**
     - [x] [Seq2Seq 架构](./docs/chapter4/10_seq2seq.md)
     - [x] [注意力机制](./docs/chapter4/11_attention.md)
     - [x] [深入解析 Transformer](./docs/chapter4/12_transformer.md)
-- **第5章：预训练模型**
+- **第 5 章：预训练模型**
     - [x] [BERT 结构及应用](./docs/chapter5/13_Bert.md)
     - [x] [GPT 结构及应用](./docs/chapter5/14_GPT.md)
     - [x] [T5 结构及应用](./docs/chapter5/15_T5.md)
     - [x] [Hugging Face 生态与核心库](./docs/chapter5/16_HuggingFace.md)
-- **第6章：深入大模型架构**
+- **第 6 章：深入大模型架构**
     - [x] [手搓一个大模型](./docs/chapter6/17_handcraft_llama2.md)
     - [x] [MOE 架构解析](./docs/chapter6/18_MoE.md)
 
 ### 第二部分：实战篇
-- **第1章：文本分类**
+- **第 1 章：文本分类**
     - [x] [文本分类简单实现](./docs/chapter7/01_text_classification.md)
     - [x] [基于 LSTM 的文本分类](./docs/chapter7/02_lstm_text_classification.md)
     - [x] [微调 BERT 模型进行文本分类](./docs/chapter7/03_bert_text_classification.md)
-- **第2章：命名实体识别**
+- **第 2 章：命名实体识别**
     - [x] [命名实体识别概要](./docs/chapter8/01_named_entity_recognition.md)
     - [x] [NER 项目的数据处理](./docs/chapter8/02_data_processing.md)
     - [x] [模型构建、训练与推理](./docs/chapter8/03_model_building_and_training.md)
     - [x] [模型的推理与优化](./docs/chapter8/04_evaluation_and_prediction.md)
 
 ### 第三部分：微调量化篇
-- **第1章：参数高效微调**
+- **第 1 章：参数高效微调**
     - [x] [PEFT 技术综述](./docs/chapter11/01_PEFT.md)
     - [x] [LoRA 方法详解](./docs/chapter11/02_lora.md)
     - [x] [基于 peft 库的 LoRA 实战](./docs/chapter11/03_peft_lora.md)
     - [x] [Qwen2.5 微调私有数据](./docs/chapter11/04_qwen2.5_qlora.md)
-- **第2章：高级微调技术**
+- **第 2 章：高级微调技术**
     - [x] [RLHF 技术详解](./docs/chapter12/01_rlhf.md)
     - [x] [LLaMA-Factory RLHF（DPO）实战](./docs/chapter12/02_llama_factory.md)
-- **第3章：大模型训练与量化**
+- **第 3 章：大模型训练与量化**
     - [ ] [Deepspeed 框架介绍](./docs/chapter13/01_deepspeed.md)
     - [ ] [AWQ 模型量化实战](./docs/chapter13/02_awg.md)
 
 ### 第四部分：应用部署篇
-- **第1章：模型服务部署**
+- **第 1 章：模型服务部署**
     - [x] [FastAPI 模型部署实战](./docs/chapter14/01_fastapi.md)
     - [x] [云服务器模型部署实战](./docs/chapter14/02_uv_linux.md)
     - [x] [使用 Docker Compose 部署模型服务](./docs/chapter14/03_docker_deploy.md)
-- **第2章：自动化与性能优化**
+- **第 2 章：自动化与性能优化**
     - [ ] [搭建 Jenkins CI/CD 自动化部署流水线]
     - [ ] [运用 TensorRT 加速模型推理]
 
 ### 第五部分：大模型安全
+- **第 1 章：安全全景与威胁建模**
+    - [ ] [安全全景与治理框架]
 
 ### 第六部分：多模态前沿
 
