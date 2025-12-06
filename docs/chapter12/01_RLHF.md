@@ -326,12 +326,12 @@ GRPO 的核心创新在于 **“去 Critic 化”**，它通过组内统计量�
 
 ## 参考文献
 
-[^1]: [Ouyang, L., Wu, J., et al. (2022). *Training language models to follow instructions with human feedback*. Advances in Neural Information Processing Systems.](https://arxiv.org/abs/2203.02155)
+[^1]: [Ouyang, L., Wu, J., et al. (2022). *Training language models to follow instructions with human feedback*.](https://arxiv.org/abs/2203.02155)
 
 [^2]: [Schulman, J., Wolski, F., et al. (2017). *Proximal policy optimization algorithms*. arXiv preprint arXiv:1707.06347.](https://arxiv.org/abs/1707.06347)
 
-[^3]: [Rafailov, R., Zong, A., et al. (2023). *Direct preference optimization: Your language model is secretly a reward model*. arXiv preprint arXiv:2305.18290.](https://arxiv.org/abs/2305.18290)
+[^3]: [Rafailov, R., Zong, A., et al. (2023). *Direct preference optimization: Your language model is secretly a reward model*.](https://arxiv.org/abs/2305.18290)
 
-[^4]: [Shao, Z., Wang, P., et al. (2024). *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models*. arXiv preprint arXiv:2402.03300.](https://arxiv.org/abs/2402.03300)
+[^4]: [Shao, Z., Wang, P., et al. (2024). *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models*.](https://arxiv.org/abs/2402.03300)
 
-[^5]: [Cui, B., Lu, Y., et al. (2024). *RLHF: A Comprehensive Survey for Cultural, Multimodal and Low Latency Alignment Methods*. arXiv preprint arXiv:2401.05583.](https://arxiv.org/abs/2401.05583)
+[^5]: [Cui, B., Lu, Y., et al. (2024). *RLHF: A Comprehensive Survey for Cultural, Multimodal and Low Latency Alignment Methods*.](https://arxiv.org/abs/2401.05583)

@@ -395,7 +395,7 @@ curl -X POST "http://<服务器公网IP>:8000/predict/ner" -H "Content-Type: app
 如果一切顺利，会收到如图 14-15 和本地测试时一致的 JSON 响应，里面包含了模型识别出的实体。同时，也可以在浏览器中访问 `http://<服务器公网IP>:8000/docs`，来查看并使用 FastAPI 自动生成的交互式 API 文档。
 
 <p align="center">
-  <img src="./images/12_2_12.png" width="80%" alt="curl 测试云端服务" />
+  <img src="./images/14_2_12.png" width="80%" alt="curl 测试云端服务" />
   <br />
   <em>图 14-15 curl 测试云端服务</em>
 </p>
