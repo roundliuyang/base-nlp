@@ -596,4 +596,4 @@ A: 在“黄风岭-挟魂崖”找到6个佛目珠后，前往“挟魂崖-枕�
 
 ## 参考文献
 
-[^1]: [Qwen Team. (2024). *Qwen2.5 Technical Report*. arXiv preprint arXiv:2407.10671.](https://arxiv.org/abs/2407.10671)
+[^1]: [Qwen Team. (2024). *Qwen2.5 Technical Report*.](https://arxiv.org/abs/2407.10671)
