@@ -120,7 +120,7 @@
     - [x] [基于 peft 库的 LoRA 实战](./docs/chapter11/03_peft_lora.md)
     - [x] [Qwen2.5 微调私有数据](./docs/chapter11/04_qwen2.5_qlora.md)
 - **第 2 章：高级微调技术**
-    - [x] [RLHF 技术详解](./docs/chapter12/01_rlhf.md)
+    - [x] [RLHF 技术详解](./docs/chapter12/01_RLHF.md)
     - [x] [LLaMA-Factory RLHF（DPO）实战](./docs/chapter12/02_llama_factory.md)
 - **第 3 章：大模型训练与量化**
     - [ ] [Deepspeed 框架介绍](./docs/chapter13/01_deepspeed.md)
