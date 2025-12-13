@@ -53,3 +53,4 @@
 - **第五部分：大模型安全**
     - **第 1 章：安全全景与威胁建模**
         - [大模型安全总览](chapter16/01_LLM_safety_overview.md)
+        - [威胁建模及风险分析](chapter16/02_threat_modeling_analysis.md)
