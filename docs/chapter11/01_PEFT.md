@@ -31,9 +31,7 @@ PEFT 的思想借鉴了计算机视觉领域的迁移学习（Transfer Learning�
 
 ### 2.1 Adapter Tuning
 
-`Adapter Tuning` 是 PEFT 领域的开创性工作之一，由 Google 在 2019 年为 BERT 模型设计 [^2]。其思路是在 Transformer 的每个块中**插入**小型的“适配器”（Adapter）模块。
-
-如图 11-1 所示，左侧的 Transformer 层展示了 Adapter 模块是如何被集成进去的。Adapter 被插入到每个子层（注意力层和前馈网络）的内部，并与主干网络形成残差连接。在训练时，只有 Adapter 模块的参数会被更新。
+`Adapter Tuning` 是 PEFT 领域的开创性工作之一，由 Google 在 2019 年为 BERT 模型设计 [^2]。其思路是在 Transformer 的每个块中**插入**小型的“适配器”（Adapter）模块。如图 11-1 所示，左侧的 Transformer 层展示了 Adapter 模块是如何被集成进去的。Adapter 被插入到每个子层（注意力层和前馈网络）的内部，并与主干网络形成残差连接。在训练时，只有 Adapter 模块的参数会被更新。
 
 <p align="center">
   <img src="./images/11_1_1.png" width="60%" alt="Adapter Tuning 结构" />
@@ -51,9 +49,7 @@ PEFT 的思想借鉴了计算机视觉领域的迁移学习（Transfer Learning�
 
 ### 2.2 Prefix Tuning
 
-2021 年，斯坦福大学的研究者提出了 `Prefix Tuning`，为 PEFT 开辟了一条全新的思路 [^3]。与 Adapter 在模型内部“动手术”不同，Prefix Tuning 选择**在模型外部做文章**，就像是给模型带上了一张“小抄”。
-
-图 11-2 是一个注解示例，它揭示了 Prefix Tuning 的工作细节。该图分别展示了 Prefix Tuning 在自回归语言模型（上）和编码器-解码器模型（下）中的应用。其核心机制在于：
+2021 年，斯坦福大学的研究者提出了 `Prefix Tuning`，为 PEFT 开辟了一条全新的思路 [^3]。与 Adapter 在模型内部“动手术”不同，Prefix Tuning 选择**在模型外部做文章**，就像是给模型带上了一张“小抄”。图 11-2 是一个注解示例，揭示了 Prefix Tuning 的工作细节。该图分别展示了 Prefix Tuning 在自回归语言模型（上）和编码器-解码器模型（下）中的应用。它的核心机制在于：
 - **前缀激活值（Prefix Activations）**：图中 `PREFIX` 部分对应的激活值 $h_i$（其中 $i ∈ P_idx$）是从一个专门的可训练矩阵 $P_{\theta}$ 中提取的，这部分参数就是微调的对象。
 - **模型计算的激活值**: 而原始输入 $x$ 和输出 $y$ 对应的激活值，则是由**冻结**的 Transformer 模型正常计算得出的。
 

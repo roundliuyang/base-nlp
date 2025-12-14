@@ -186,7 +186,7 @@ SafeDecoding 的具体防御逻辑如图 16-9 所示。在**训练阶段（Train
   *   **高隐蔽性**：研究发现，优化后的攻击 Prompt 的**困惑度**甚至可能低于正常人类语言。这说明基于 PPL 的传统防火墙会将这些恶意请求误判为“高质量输入”而放行。
   *   **高迁移性**：这种攻击利用的是 Transformer 架构的通用弱点。攻击者可以在开源模型上生成攻击样本，直接用于攻击闭源的商业模型（如 Gemini 或 GPT），成功率依然很高。
 
-  LoopLLM 的具体攻击流程如图 16-11 所示。整个框架分为两部分：**I. 重复诱导 Prompt 优化 （Repetition-Inducing Prompt Optimization）** 和 **II. Token 对齐的集成优化（Token-Aligned Ensemble Optimization）**。在第一部分，系统首先初始化一个由循环片段（Cyclic Segment，如 "A B C A B C..."）构成的后缀。然后，通过计算 **Cycle Loss**（一种鼓励模型重复生成该片段的损失函数），利用梯度反向传播来寻找能最小化该损失的 Token 替换方案。这个过程反复迭代，直到找到一个能稳定触发模型重复行为的 **Adversarial Prompt**。而第二部分，为了提高攻击的通用性，LoopLLM 利用多个共享相同 Tokenizer 的替代模型（如不同参数量的 Llama 模型）进行集成优化。它将多个模型的梯度进行聚合，搜索出那些在所有模型上都能有效触发低熵循环的“通用攻击后缀”。这就解释了为什么 LoopLLM 能够跨模型迁移，甚至攻击未知的黑盒商业模型。
+  LoopLLM 的具体攻击流程如图 16-11 所示。整个框架分为两部分，**I. 重复诱导 Prompt 优化 （Repetition-Inducing Prompt Optimization）** 和 **II. Token 对齐的集成优化（Token-Aligned Ensemble Optimization）**。在第一部分，系统首先初始化一个由循环片段（Cyclic Segment，如 "A B C A B C..."）构成的后缀。然后，通过计算 **Cycle Loss**（一种鼓励模型重复生成该片段的损失函数），利用梯度反向传播来寻找能最小化该损失的 Token 替换方案。这个过程反复迭代，直到找到一个能稳定触发模型重复行为的 **Adversarial Prompt**。而第二部分，为了提高攻击的通用性，LoopLLM 利用多个共享相同 Tokenizer 的替代模型（如不同参数量的 Llama 模型）进行集成优化。它将多个模型的梯度进行聚合，搜索出那些在所有模型上都能有效触发低熵循环的“通用攻击后缀”。这就解释了为什么 LoopLLM 能够跨模型迁移，甚至攻击未知的黑盒商业模型。
 
   <p align="center">
     <img src="./images/16_2_6.png" width="90%" alt="LoopLLM 攻击框架示意图" />
