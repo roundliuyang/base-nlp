@@ -42,6 +42,8 @@
     - **第 2 章：高级微调技术**
         - [RLHF 技术详解](chapter12/01_RLHF.md)
         - [LLaMA-Factory RLHF（DPO）实战](chapter12/02_llama_factory.md)
+    - **第 3 章：大模型训练与量化**
+        - [模型量化实战](chapter13/01_quantization.md)
 
 - **第四部分：应用部署篇**
     - **第 1 章：模型服务部署**
