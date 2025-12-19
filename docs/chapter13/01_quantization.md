@@ -505,7 +505,7 @@ def gptq_chat(question: str) -> str:
     out_ids = gen_ids[0, input_ids.shape[-1]:]
     return gptq_tokenizer.decode(out_ids, skip_special_tokens=True).strip()
 
-print(gptq_chat("用两三句话解释一下什么是量子计算？"))
+gptq_chat("用两三句话解释一下什么是量子计算？")
 ```
 
 输出如下：
