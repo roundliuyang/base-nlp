@@ -350,7 +350,7 @@
                                 oldContainer.remove();
                             }
                             
-                            // 创建新的 giscus 容器，插入到 main 容器内（但在 .content 外面）
+                            // 创建新的 giscus 容器：插入到 .content 内，但不放进 .markdown-section（避免被 docsify 当作路由/锚点处理）
                             var container = document.createElement('div');
                             container.id = 'docsify-giscus-comments';
                             container.className = 'giscus';
@@ -386,6 +386,58 @@
                 }
             ]
         }
+    </script>
+    <script>
+        // 防止 docsify 将 giscus 触发的锚点 hash（例如 #docsify-giscus-comments / #/docsify-giscus-comments）
+        // 误当作路由去请求对应的 .md 文件，从而产生 404。
+        (function () {
+            var lastRoute = (location.hash && location.hash.startsWith('#/')) ? location.hash : '#/';
+
+            function isGiscusAnchorHash(hash) {
+                if (!hash) return false;
+                // giscus 登录 / 回跳时可能会把 hash 设置为容器 id（带不带 "/"" 都可能）
+                return hash === '#docsify-giscus-comments' ||
+                    hash === '#/docsify-giscus-comments' ||
+                    hash.startsWith('#docsify-giscus-comments?') ||
+                    hash.startsWith('#/docsify-giscus-comments?') ||
+                    // 兼容部分示例/默认容器名
+                    hash === '#comments' ||
+                    hash === '#/comments' ||
+                    hash.startsWith('#comments?') ||
+                    hash.startsWith('#/comments?');
+            }
+
+            window.addEventListener('hashchange', function (e) {
+                try {
+                    var h = location.hash || '';
+                    // 先处理 giscus 可能写入的 hash（可能带 "/""），避免被当成 docsify 路由
+                    if (isGiscusAnchorHash(h)) {
+                        // 还原到上一条 docsify 路由，并阻止后续监听器（docsify 路由器）处理这次 hashchange
+                        if (e && typeof e.stopImmediatePropagation === 'function') {
+                            e.stopImmediatePropagation();
+                        }
+                        history.replaceState(null, '', location.pathname + location.search + lastRoute);
+
+                        // 尝试滚动到评论区（不改变 hash，避免再次触发 docsify）
+                        setTimeout(function () {
+                            var el = document.getElementById('docsify-giscus-comments');
+                            if (!el) return;
+                            try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                            catch (_) { el.scrollIntoView(true); }
+                        }, 0);
+                        return;
+                    }
+
+                    if (h.startsWith('#/')) {
+                        lastRoute = h;
+                        return;
+                    }
+
+                } catch (_) {
+                    // 忽略
+                }
+            }, true);
+        })();
     </script>
     <!-- Put them above docsify.min.js -->
     <script src="//cdn.jsdelivr.net/npm/docsify@latest/lib/docsify.min.js"></script>
