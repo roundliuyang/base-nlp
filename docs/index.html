@@ -362,7 +362,24 @@
                             script.setAttribute('data-repo-id', 'R_kgDOPgR-bQ');
                             script.setAttribute('data-category', 'Comments');
                             script.setAttribute('data-category-id', 'DIC_kwDOPgR-bc4C0SfZ');
-                            script.setAttribute('data-mapping', 'url');
+                            // docsify 使用 hash 路由（#/xxx）。giscus 的 url/pathname 映射默认不以 hash 作为键，
+                            // 会导致“所有页面评论互通”。这里改成 specific，并用当前 docsify 路由作为 term。
+                            // 同时去掉 ?id=... 这类标题锚点参数，避免同一页面不同小标题生成不同 discussion。
+                            var term = (function () {
+                                try {
+                                    var h = decodeURIComponent(location.hash || '');
+                                    if (!h) return 'home';
+                                    // 去掉开头的 "#/" 或 "#"
+                                    h = h.replace(/^#\/?/, '');
+                                    // 去掉 query（例如 ?id=xxx）
+                                    h = h.replace(/\?.*$/, '');
+                                    return h || 'home';
+                                } catch (_) {
+                                    return 'home';
+                                }
+                            })();
+                            script.setAttribute('data-mapping', 'specific');
+                            script.setAttribute('data-term', term);
                             script.setAttribute('data-strict', '0');
                             script.setAttribute('data-reactions-enabled', '1');
                             script.setAttribute('data-emit-metadata', '0');
