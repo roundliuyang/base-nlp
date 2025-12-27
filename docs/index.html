@@ -158,10 +158,7 @@
                     '/en/': '😞 No Results',
                     '/': '😞 找不到结果'
                 },
-                depth: 6,
-                namespace: 'base-nlp',
-                pathNamespaces: /^(\/(en))?/,
-                hideOtherSidebarContent: false
+                depth: 6
             },
             pagination: {
                 previousText: {
@@ -299,6 +296,43 @@
 
                         // 监听路由变化
                         window.addEventListener('hashchange', updateSelector);
+                    });
+                },
+                // 重写原始 HTML <img> 的相对路径，使其与 docsify 的 Markdown 图片解析一致
+                function(hook, vm) {
+                    function getRouteDir() {
+                        var hash = decodeURIComponent(window.location.hash || '');
+                        if (!hash || hash === '#/' || hash === '#') return '';
+                        var path = hash.replace(/^#\//, '').replace(/(\?.*|#.*)/g, '');
+                        if (path && !path.endsWith('/')) {
+                            path = path.replace(/[^\/]*$/, '');
+                        }
+                        return path;
+                    }
+
+                    hook.doneEach(function() {
+                        try {
+                            var routeDir = getRouteDir();
+                            // location.pathname 例如: /all-in-rag/
+                            var base = window.location.origin + window.location.pathname + routeDir;
+                            var selector = '.markdown-section img:not([data-origin])';
+                            var imgs = document.querySelectorAll(selector);
+                            imgs.forEach(function(img) {
+                                var src = img.getAttribute('src');
+                                if (!src) return;
+                                // 跳过已是绝对路径或以 / 开头的路径
+                                if (/^(https?:)?\/\//i.test(src) || src.startsWith('/')) return;
+                                try {
+                                    // 利用 URL 自动规范化 ./ 和 ../
+                                    var abs = new URL(src, base).pathname;
+                                    img.setAttribute('src', abs);
+                                } catch (e) {
+                                    // 忽略单个元素的失败
+                                }
+                            });
+                        } catch (e) {
+                            // 忽略整体处理失败，避免影响页面其他功能
+                        }
                     });
                 },
                 // giscus 评论插件：在每个页面底部动态加载评论区
