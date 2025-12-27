@@ -118,8 +118,9 @@
         }
         /* giscus 评论区域样式 */
         #docsify-giscus-comments {
-            width: 100%;
-            margin-top: 3rem;
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 2rem;
         }
         #docsify-giscus-comments .giscus {
             width: 100%;
@@ -127,6 +128,10 @@
         #docsify-giscus-comments .giscus-frame {
             width: 100%;
             border: none;
+        }
+        /* 确保 giscus 不会被 docsify 的路由系统拦截 */
+        #docsify-giscus-comments a {
+            pointer-events: auto !important;
         }
     </style>
 </head>
@@ -339,16 +344,13 @@
                 function(hook, vm) {
                     hook.doneEach(function() {
                         try {
-                            var markdown = document.querySelector('.markdown-section');
-                            if (!markdown) return;
-                            
                             // 移除旧的 giscus 容器（如果存在）
                             var oldContainer = document.getElementById('docsify-giscus-comments');
                             if (oldContainer) {
                                 oldContainer.remove();
                             }
                             
-                            // 创建新的 giscus 容器
+                            // 创建新的 giscus 容器，插入到 main 容器内（但在 .content 外面）
                             var container = document.createElement('div');
                             container.id = 'docsify-giscus-comments';
                             container.className = 'giscus';
@@ -371,7 +373,12 @@
                             script.async = true;
                             
                             container.appendChild(script);
-                            markdown.appendChild(container);
+                            
+                            // 插入到 main 元素的最后，而不是 .markdown-section 里
+                            var main = document.querySelector('main');
+                            if (main) {
+                                main.appendChild(container);
+                            }
                         } catch (e) {
                             console.error('giscus 加载失败:', e);
                         }
