@@ -1,4 +1,4 @@
-# 第一节 搭建 Jenkins CI/CD 自动化部署流水线
+# 第一节 Git 与 GitHub 版本控制基础
 
 上一章，我们成功利用 Docker 和 Docker Compose 将 NER 模型服务进行了容器化封装。实现了“一次构建，随处运行”的目标，缓解了环境不一致的问题。
 
@@ -36,7 +36,7 @@ CI/CD 是 DevOps 理念落地的关键实践，它通过将软件开发中的构
 
 在持续集成的基础上，将代码自动部署到测试环境甚至生产环境。它涵盖了自动化部署、环境配置管理和发布流程编排。这一过程的价值在于**缩短上市时间**（Time to Market），代码从开发完成到上线的时间被压缩到最短，使企业能快速响应市场变化。而且，由于发布频率高，每次发布的变更量小，即使出问题也容易排查和回滚，从而大幅**降低了发布风险**。这也把运维人员从繁琐、易错的熬夜手动发版中**解放出来**，让机器自动执行标准化流程。
 
-简而言之，CI/CD 就像一个**不知疲倦的智能管家**。它在保证质量的前提下，让软件交付变得像“工厂流水线”一样标准、高效且可靠，开发人员能专注于业务逻辑，而不是被繁琐的部署流程所困扰。我们当前的目标就是搭建这样一套流程，**本地代码提交 (Git) -> 代码仓库 (GitLab/Gitee) -> Jenkins 自动构建 -> 部署到服务器**。而这一切的基础，首先是**版本控制**。
+简而言之，CI/CD 就像一个**不知疲倦的智能管家**。它在保证质量的前提下，让软件交付变得像“工厂流水线”一样标准、高效且可靠，开发人员能专注于业务逻辑，而不是被繁琐的部署流程所困扰。我们当前的目标就是搭建这样一套流程，**本地代码提交 (Git) -> 代码仓库 (GitLab/GitHub) -> Jenkins 自动构建 -> 部署到服务器**。而这一切的基础，首先是**版本控制**。
 
 ## 二、Git 版本控制基础
 
@@ -70,7 +70,7 @@ Git 支持 Windows、macOS 和 Linux 等多种平台。
 - **安装**：双击运行下载的 `.exe` 文件。安装向导中会有很多选项（如编辑器选择、路径环境配置等），对于初学者，**一路点击 "Next" 使用默认设置**即可。等待安装进度条走完，就能看到如图 15-3 所示的安装完成界面。
 
 <p align="center">
-  <img src="./images/15_1_3.png" width="80%" alt="Git 安装完成界面" />
+  <img src="./images/15_1_3.png" width="70%" alt="Git 安装完成界面" />
   <br />
   <em>图 15-3 Git 安装完成界面</em>
 </p>
@@ -119,7 +119,7 @@ git config --global user.email "your_email@example.com"
 git config --global color.ui true
 ```
 
-> 这里的配置仅用于在提交历史中记录开发者身份，**并不是用于登录远程代码仓库的账号密码**。不过为了便于识别**建议填写与注册代码托管平台（ GitHub/Gitee 等）时一致的用户名和邮箱**。
+> 这里的配置仅用于在提交历史中记录开发者身份，**并不是用于登录远程代码仓库的账号密码**。不过为了便于识别**建议填写与注册代码托管平台时一致的用户名和邮箱**。
 
 查看配置是否生效：
 ```bash
@@ -155,6 +155,8 @@ git init
 ```
 
 执行 `git init` 后，目录下会生成一个隐藏的 `.git` 文件夹。这个文件夹就是 Git 的核心数据库（版本库），千万不要手动删除或修改它。
+
+> 在 Windows 资源管理器中，`.git` 默认是隐藏的。如果想看到它，需要在文件夹选项中勾选“显示隐藏的文件、文件夹和驱动器”；或者直接在命令行中使用 `dir /a` 查看当前目录下的所有文件。
 
 （2）**“工作区”到“暂存区”**
 
@@ -464,9 +466,9 @@ no changes added to commit (use "git add" and/or "git commit -a")
 - **只改动了工作区，还没 `git add`**
 
   最简单的做法是直接在编辑器里手动删掉多余代码，也可以用 Git 一键丢弃修改：
-
+ 
    ```bash
-   git restore test.py
+  git restore test.py
    ```
 
   这会把 `test.py` 恢复为当前提交（`HEAD`）中的内容，相当于这次编辑从未发生。
@@ -474,18 +476,18 @@ no changes added to commit (use "git add" and/or "git commit -a")
 - **已经 `git add` 到暂存区，但还没 `git commit`**
 
   此时 `git status` 会提示 “Changes to be committed”，我们可以分两步撤销：
-
+ 
    ```bash
-   # 第一步：从暂存区撤销（保留工作区修改）
-   git restore --staged test.py
-   # 如果这是第一次提交、提示找不到 HEAD，也可以用：
-   # git rm --cached test.py
+  # 第一步：从暂存区撤销（保留工作区修改）
+  git restore --staged test.py
+  # 如果这是第一次提交、提示找不到 HEAD，也可以用：
+  # git rm --cached test.py
 
-   # 第二步：丢弃工作区修改
-   git restore test.py
+  # 第二步：丢弃工作区修改
+  git restore test.py
    ```
 
-  这样既不会把“脏代码”提交进版本历史，工作目录也会恢复干净。
+    这样既不会把“脏代码”提交进版本历史，工作目录也会恢复干净。
 
 > 只要还没有 `commit`，大多数情况下都可以通过“编辑器 + `git restore`（或老版 git 命令 `git checkout --`）”把代码改回去。
 
@@ -819,7 +821,7 @@ v2.0.0
 
 （4）**删除不再需要的标签**
 
-有时候我们可能会发现某个标签打错了，或者不再需要，可以在本地删除它：
+有时候我们可能会发现某个标签打错了，或者不再需要，可以在本地删除：
 
 ```bash
 git tag -d v1.0.0
@@ -831,5 +833,200 @@ git tag -d v1.0.0
 Deleted tag 'v1.0.0' (was 58af4bc)
 ```
 
-删除后再执行 `git tag` 就只会看到剩余的标签（例如仅剩 `v2.0.0`）。需要注意这里删除的只是**本地标签**；如果标签已经推送到远程仓库，还需要在远程执行对应的删除操作。
+删除后再执行 `git tag` 就只会看到剩余的标签。需要注意这里删除的只是**本地标签**，如果标签已经推送到远程仓库，还需要在远程执行对应的删除操作。
 
+## 三、GitHub 远程仓库与代码托管
+
+前面我们已经掌握了在本机上使用 Git 进行版本管理、分支管理以及打 Tag。**但目前所有历史版本仍然只保存在本机**：一旦电脑损坏、硬盘丢失，或者你想把代码分享给团队成员，就会非常不方便。为了解决**代码备份、多人协作和自动部署**这三个核心问题，需要把本地仓库“托管”到一个稳定可靠的远程平台上，这里我们以 **GitHub** 为例进行操作。GitHub 是目前全球最主流的开源代码托管平台之一，既可以创建开源项目的 **Public 仓库**，也支持个人或团队使用的 **Private 私有仓库**，非常适合作为我们学习和实践的远程仓库平台。
+
+### 3.1 远程仓库的作用
+
+只用本地 Git 仓库时，代码只存在于一台机器上，团队其他成员看不到你的提交历史，也无法直接基于你的版本继续开发；每个人电脑上各自维护一份仓库，很难确定“哪一份才是当前权威版本”；同时也**不利于自动化**——像 Jenkins 这类 CI/CD 工具通常会从统一的远程仓库拉取代码，如果只有本地仓库，就无法和流水线打通。
+
+将代码推送到远程仓库（Remote Repository），可以同时解决这几个问题：
+
+- **集中托管**：所有人都以远程仓库为“单一真相源”；  
+- **方便协作**：团队成员可以随时拉取最新代码、提交自己的修改；  
+- **自动部署入口**：Jenkins 等工具可以从远程仓库自动拉取最新代码，触发构建与发布流程。
+
+### 3.2 注册 GitHub 并创建远程仓库
+
+（1）在浏览器中访问 `https://github.com`，如果还没账号点击右上角 **Sign up** 按钮，根据提示完成注册（邮箱、用户名、密码等）。  
+
+<p align="center">
+  <img src="./images/15_1_7.png" width="80%" alt="GitHub 官网首页" />
+  <br />
+  <em>图 15-7 GitHub 官网首页</em>
+</p>
+
+（2）登录后，如图 15-8 在页面右上角点击 **“+” -> New repository** 创建新仓库。
+
+<p align="center">
+  <img src="./images/15_1_8.png" width="80%" alt="GitHub 新建仓库菜单" />
+  <br />
+  <em>图 15-8 GitHub 新建仓库菜单</em>
+</p>
+
+（3）进入新建页面后，如图 15-9 依次填写配置：
+
+- **Repository name**：仓库名称，例如 `ner-demo`；  
+- **Description（可选）**：简单说明这个仓库做什么用；  
+- **Choose visibility**：选择 `Public`（任何人都能看到）或 `Private`（只有受邀成员可访问）；
+- **Add README**（可选）：可以勾选，会自动生成一个 `README.md`，方便后续展示。
+- **Add .gitignore**（可选）：选择语言（如 Python），GitHub 会自动生成忽略文件（如 `__pycache__/`），避免将无需版本控制的中间文件提交到仓库；
+- **Add license**（可选）：选择开源协议（如 MIT、Apache 2.0），明确项目的开源许可范围。
+
+<p align="center">
+  <img src="./images/15_1_9.png" width="80%" alt="GitHub 新建仓库页面" />
+  <br />
+  <em>图 15-9 GitHub 新建仓库页面</em>
+</p>
+
+（4）点击右下角 **Create repository**，一个空的远程 GitHub 仓库就创建好了。
+
+### 3.3 使用 SSH 密钥连接 GitHub（推荐）
+
+推送代码到 GitHub 时，常用两种方式 **HTTPS** 和 **SSH**。HTTPS 方式每次推送都需要输入账号密码（或 Token），而 SSH 方式可以在配置好密钥后免密推送，更适合日常开发。
+
+生成并配置 SSH 公钥的大致步骤如下（以 Windows PowerShell / Git Bash 为主，Linux/macOS 下命令相同）：
+
+```bash
+# 生成一对新的 SSH 密钥（如果之前没有）
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+
+> `"your_email@example.com"` 建议填写在 GitHub 注册时使用的邮箱（或与 Git 身份配置一致的邮箱），主要用于标记这对密钥的归属，方便日后识别。
+
+一路回车即可使用默认设置，它会在用户主目录下生成两个文件（Linux/macOS 下一般是 `~/.ssh/`，Windows 下通常是 `C:\Users\<你的用户名>\.ssh\`）：
+
+- `~/.ssh/id_rsa`：私钥（不要泄露给任何人）；  
+- `~/.ssh/id_rsa.pub`：公钥（可以安全地提交给 GitHub 等平台）。
+
+接下来，将公钥添加到 GitHub：
+
+- 在 Windows 下，可以使用记事本或 VS Code 打开 `id_rsa.pub`；在 Linux/macOS 下可以使用 `cat ~/.ssh/id_rsa.pub` 查看公钥内容。无论哪种方式，都需要复制整行公钥字符串；  
+
+- 如图 15-10 所示，打开 GitHub 网页，点击右上角头像 -> **Settings** -> 左侧菜单选择 **SSH and GPG keys** -> 点击 **New SSH key**；
+  <p align="center">
+    <img src="./images/15_1_10.png" width="80%" alt="GitHub 配置 SSH Key" />
+    <br />
+    <em>图 15-10 GitHub 配置 SSH Key</em>
+  </p>
+
+- 在 **Title** 中填写一个便于识别的名字。**Key type** 一栏保持默认的 `Authentication Key`（用于 SSH 登录和推送代码），另一个 `Signing Key` 主要用于提交签名，暂时不需要。在 **Key** 文本框中粘贴刚才复制的公钥内容，点击 **Add SSH key** 保存。
+
+  <p align="center">
+    <img src="./images/15_1_11.png" width="80%" alt="GitHub 添加 SSH Key 页面" />
+    <br />
+    <em>图 15-11 GitHub 添加 SSH Key</em>
+  </p>
+
+完成上述步骤后，就可以通过 `git@github.com:...` 这种 **SSH 地址** 来免密推送和拉取代码了。
+
+> 如果暂时不想配置 SSH，也可以使用 HTTPS 地址（`https://github.com/...`），只是推送时需要按照 GitHub 要求使用 Token 等方式进行身份验证。
+
+### 3.4 将本地仓库与 GitHub 远程仓库关联
+
+在实际使用中，常见的起步方式有两种：
+
+- 情况 A：已经在本地某个目录里写好了代码，并通过 `git init` 把它变成了一个本地仓库，现在希望**把这个现有仓库推送到 GitHub**；  
+- 情况 B：先在 GitHub 上创建了远程仓库（比如前面创建的 `ner-demo`），本地还没有任何仓库，然后**在一个合适的目录里通过 `git clone` 拉取代码**。
+
+本小节先讲情况 A（已有本地仓库如何关联到 GitHub），情况 B 则对应下面 3.5 小节的 `git clone` 示例。
+
+假设我们已经在本地有一个通过 `git init` 初始化过的仓库，并且完成了至少一次提交。接下来要做的就是**告诉本地仓库它的“远程家”在哪里**。
+
+（1）在 GitHub 仓库页面中，如图 15-12 点击绿色的 **Code** 按钮，切换到 **SSH** 选项卡，复制里面的地址：
+
+<p align="center">
+  <img src="./images/15_1_12.png" width="80%" alt="GitHub 复制 SSH 地址" />
+  <br />
+  <em>图 15-12 GitHub 复制 SSH 地址</em>
+</p>
+
+（2）将下面命令中 `your-username` 替换为自己的 GitHub 用户名后，在本地项目根目录下执行。
+
+```bash
+git remote add origin git@github.com:your-username/ner-demo.git
+```
+
+其中：
+
+- `remote` 表示我们在操作**远程仓库配置**；  
+- `add` 表示添加一个新的远程；  
+- `origin` 是这个远程仓库的**别名**（约定俗成的写法，也可以用其他名称）；  
+- 后面的 SSH 地址就是刚才在 GitHub 上复制的仓库地址。
+
+（3）第一次推送本地分支到远程时，使用：
+
+```bash
+# -u 会将当前本地分支与远程分支建立“跟踪关系”
+git push -u origin master
+```
+
+这条命令的含义是将当前的 `master` 分支推送到远程名为 `origin` 的仓库中，并在远程创建同名分支。如果默认分支是 `main`，改用：
+
+```bash
+git push -u origin main
+```
+
+> 在这台电脑上第一次通过 SSH 推送到 `github.com` 时，终端可能会提示 `The authenticity of host 'github.com' can't be established... Are you sure you want to continue connecting (yes/no/[fingerprint])?`，这里输入完整的 `yes` 并回车即可，之后同一台机器再连接 GitHub 就不会重复询问。
+
+之后，再次推送时就可以直接使用命令 `git push`，Git 会自动根据跟踪关系，将当前分支推送到对应的远程分支。
+
+### 3.5 从 GitHub 克隆远程仓库
+
+如果是从零开始参与一个已有项目，最常见的做法是先**克隆（clone）远程仓库**：
+
+```bash
+git clone git@github.com:your-username/ner-demo.git
+```
+
+输出如下：
+
+```bash
+Cloning into 'ner-demo'...
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (3/3), done.
+```
+
+执行完毕后，当前目录下会出现一个名为 `ner-demo` 的文件夹，里面已经包含：
+
+- 完整的工作区代码；  
+- `.git` 目录（包含所有提交历史与分支信息）；  
+- 已经配置好的远程别名 `origin`，指向 GitHub 上对应的仓库。
+
+从现在开始，在这个目录中进行的 `git add` / `git commit` / `git push` / `git pull` 等操作，都会与 GitHub 上的远程仓库进行联动。
+
+> `git clone` 通常**只在第一次拿到仓库时执行一次**即可，后续更新代码请使用 `git pull`，而不是反复重新 clone。
+
+### 3.6 日常协作中的 push 与 pull
+
+在团队协作中，常见的日常流程可以总结为：
+
+- **开始开发前**先从远程仓库拉取最新代码：
+
+  ```bash
+  git pull origin main
+  # 或 git pull origin master
+  ```
+
+  这样可以确保当前是基于团队的最新代码开始一天的开发，避免在过期代码上继续工作。
+
+- **本地开发过程中**，按照前面学到的流程修改代码、运行测试，使用：
+
+  ```bash
+  git add <修改的文件>
+  git commit -m "feat: 描述本次改动"
+  ```
+
+- **开发告一段落后**将本地提交推送到远程仓库：
+
+  ```bash
+  git push origin master
+  # 或 git push origin main
+  ```
+
+`push` 可以理解为“把本地的提交**推**到远程”；`pull` 则可以理解为“从远程**拉**取并合并到本地”。一个简单且安全的习惯是**先 pull 再 push**，始终在远程最新状态的基础上进行开发和提交，这样可以减少冲突和覆盖他人代码的风险。

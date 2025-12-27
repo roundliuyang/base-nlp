@@ -132,6 +132,7 @@
     - [x] [云服务器模型部署实战](./docs/chapter14/02_uv_linux.md)
     - [x] [使用 Docker Compose 部署模型服务](./docs/chapter14/03_docker_deploy.md)
 - **第 2 章：自动化与性能优化**
+    - [x] [Git 与 GitHub 版本控制基础](./docs/chapter15/01_Git.md)
     - [ ] [搭建 Jenkins CI/CD 自动化部署流水线]
     - [ ] [运用 TensorRT 加速模型推理]
 
