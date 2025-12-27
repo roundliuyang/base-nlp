@@ -390,8 +390,29 @@
     <script>
         // 防止 docsify 将 giscus 触发的锚点 hash（例如 #docsify-giscus-comments / #/docsify-giscus-comments）
         // 误当作路由去请求对应的 .md 文件，从而产生 404。
+        // 同时提供可开关的调试输出：打开控制台运行 localStorage.setItem('giscus-debug','1') 后刷新即可看到日志。
         (function () {
+            function debugEnabled() {
+                try {
+                    if (localStorage && localStorage.getItem('giscus-debug') === '1') return true;
+                } catch (_) { /* ignore */ }
+                try {
+                    return /(?:\?|&)giscusDebug=1(?:&|$)/.test(location.search || '');
+                } catch (_) { /* ignore */ }
+                return false;
+            }
+
+            function dlog() {
+                if (!debugEnabled()) return;
+                try {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift('[giscus-debug]');
+                    console.log.apply(console, args);
+                } catch (_) { /* ignore */ }
+            }
+
             var lastRoute = (location.hash && location.hash.startsWith('#/')) ? location.hash : '#/';
+            dlog('init', { href: location.href, hash: location.hash, lastRoute: lastRoute });
 
             function isGiscusAnchorHash(hash) {
                 if (!hash) return false;
@@ -407,20 +428,49 @@
                     hash.startsWith('#/comments?');
             }
 
+            // 记录窗口焦点变化，方便判断“点登录”时是否弹出/跳转
+            window.addEventListener('blur', function () { dlog('window blur'); }, true);
+            window.addEventListener('focus', function () { dlog('window focus'); }, true);
+            document.addEventListener('visibilitychange', function () {
+                dlog('visibilitychange', document.visibilityState);
+            }, true);
+
+            // 记录来自 giscus iframe 的 postMessage（跨域无法读 iframe 内部，但可看消息）
+            window.addEventListener('message', function (ev) {
+                try {
+                    if (!debugEnabled()) return;
+                    var origin = ev && ev.origin;
+                    if (origin && /giscus\.app$/i.test(origin)) {
+                        dlog('message from giscus', { origin: origin, data: ev.data });
+                    }
+                } catch (_) { /* ignore */ }
+            }, false);
+
             window.addEventListener('hashchange', function (e) {
                 try {
                     var h = location.hash || '';
+                    dlog('hashchange', {
+                        oldURL: e && e.oldURL,
+                        newURL: e && e.newURL,
+                        currentHash: h,
+                        lastRoute: lastRoute
+                    });
+
                     // 先处理 giscus 可能写入的 hash（可能带 "/""），避免被当成 docsify 路由
                     if (isGiscusAnchorHash(h)) {
+                        dlog('intercept giscus anchor hash', h);
+
                         // 还原到上一条 docsify 路由，并阻止后续监听器（docsify 路由器）处理这次 hashchange
                         if (e && typeof e.stopImmediatePropagation === 'function') {
                             e.stopImmediatePropagation();
                         }
                         history.replaceState(null, '', location.pathname + location.search + lastRoute);
+                        dlog('restore route', lastRoute);
 
                         // 尝试滚动到评论区（不改变 hash，避免再次触发 docsify）
                         setTimeout(function () {
                             var el = document.getElementById('docsify-giscus-comments');
+                            dlog('scrollIntoView target', !!el);
                             if (!el) return;
                             try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
                             catch (_) { el.scrollIntoView(true); }
@@ -430,11 +480,11 @@
 
                     if (h.startsWith('#/')) {
                         lastRoute = h;
+                        dlog('update lastRoute', lastRoute);
                         return;
                     }
-
-                } catch (_) {
-                    // 忽略
+                } catch (err) {
+                    dlog('hashchange handler error', err);
                 }
             }, true);
         })();
