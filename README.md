@@ -133,7 +133,7 @@
     - [x] [使用 Docker Compose 部署模型服务](./docs/chapter14/03_docker_deploy.md)
 - **第 2 章：自动化与性能优化**
     - [x] [Git 与 GitHub 版本控制基础](./docs/chapter15/01_Git.md)
-    - [x] [搭建 Jenkins CI/CD 自动化部署流水线]
+    - [x] [搭建 Jenkins CI/CD 自动化部署流水线](./docs/chapter15/02_Jenkins.md)
     - [ ] [运用 TensorRT 加速模型推理]
 
 ### 第五部分：大模型安全
