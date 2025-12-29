@@ -30,7 +30,7 @@
 sudo apt update && sudo apt upgrade -y
 ```
 
-更新完成后，再来处理 Jenkins 所需的 Java 运行环境。特别要注意的一点是，**Jenkins 运行依赖 Java 环境，且新版本要求 JDK 17 及以上**。很多发行版（包括常见的 Ubuntu 长期支持版）默认自带的是 JDK 8，需要我们手动升级。
+更新完成后，再来处理 Jenkins 所需的 Java 运行环境。特别要注意的一点是，**Jenkins 运行依赖 Java 环境，自 2024 年之后发布的 LTS 版本开始要求至少使用 JDK 17**。很多发行版（包括常见的 Ubuntu 长期支持版）默认自带的是 JDK 8 或 JDK 11，需要我们手动升级到 JDK 17 才能满足最新 Jenkins 版本的运行要求。
 
 （1）查看当前 Java 版本：
 
@@ -98,11 +98,14 @@ Jenkins 官方下载页 [jenkins.io/download](https://www.jenkins.io/download/) 
 （1）安装 Jenkins：
 
 ```bash
-# 导入 Jenkins 官方 GPG 密钥
+# 如果尚不存在，先创建存放 keyring 的目录
+sudo mkdir -p /etc/apt/keyrings
+
+# 导入 Jenkins 官方 GPG 密钥（写入到 keyring 文件）
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
 
-# 写入 Jenkins APT 软件源配置
-echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+# 写入 Jenkins APT 软件源配置，引用上面的 keyring
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 # 更新软件包索引并安装 Jenkins
 sudo apt update && sudo apt install jenkins -y
@@ -181,7 +184,7 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 （1）查看或修改管理员密码
 
-只要当前已经成功登录 Jenkins，就可以在界面中直接修改密码。在右上角点击当前用户名，进入个人主页后切换到 **Security / 安全**，在 Password 区域输入两遍新密码并保存即可。也可以通过 “Manage Jenkins -> Manage Users（管理 Jenkins -> 管理用户）” 找到对应用户，在用户详情页该用户设置一个新密码。只有在**完全无法登录 Jenkins（忘记所有管理员账号密码）**时，才需要在服务器上暂时关闭安全认证或通过 Groovy 脚本重置密码，具体步骤会因版本和安全域配置略有不同，建议参考 Jenkins 官方文档中的说明，按最新指引操作。
+只要当前已经成功登录 Jenkins，就可以在界面中直接修改密码。在右上角点击当前用户名，进入个人主页后切换到 **Security**，在 Password 区域输入两遍新密码并保存即可。也可以通过 “Manage Jenkins -> Manage Users（管理 Jenkins -> 管理用户）” 找到对应用户，在用户详情页该用户设置一个新密码。只有在**完全无法登录 Jenkins（忘记所有管理员账号密码）**时，才需要在服务器上暂时关闭安全认证或通过 Groovy 脚本重置密码，具体步骤会因版本和安全域配置略有不同，建议参考 Jenkins 官方文档中的说明，按最新指引操作。
 
 （2）插件源和网络问题  
 
@@ -233,7 +236,7 @@ ner-demo/
 
 > 实际项目中，体积较大的模型权重和数据文件通常不会直接提交到 Git 仓库，而是存放在对象存储或模型仓库，通过配置或部署脚本在部署阶段拉取。当前为了便于“一次复制即可跑通示例”，才将 `checkpoints/` 等文件一并放进仓库，真实工程可以按团队规范将代码与模型存储拆分管理。
 
-### 2.3 在部署服务器上改用 Git 拉取代码
+### 2.2 在部署服务器上改用 Git 拉取代码
 
 我们在部署 NER 时是通过 FinalShell **手工上传** `ner_deployment` 目录到云服务器，并在该目录下执行 `docker compose up --build -d` 启动服务。为了与 CI/CD 流水线对齐，现在推荐改为在部署服务器上直接通过 Git 拉取代码，并以 Git 版本为准管理部署目录。
 
