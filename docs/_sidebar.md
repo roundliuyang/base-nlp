@@ -53,7 +53,6 @@
     - **第 2 章：自动化与性能优化**
         - [Git 与 GitHub 版本控制基础](chapter15/01_Git.md)
         - [搭建 Jenkins CI/CD 自动化部署流水线](chapter15/02_Jenkins.md)
-        - [运用 TensorRT 加速模型推理]
 
 - **第五部分：大模型安全**
     - **第 1 章：安全全景与威胁建模**

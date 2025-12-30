@@ -132,8 +132,7 @@
     - [x] [云服务器模型部署实战](./chapter14/02_uv_linux.md)
     - [x] [使用 Docker Compose 部署模型服务](./chapter14/03_docker_deploy.md)
 - **第2章：自动化与性能优化**
-    - [ ] [搭建 Jenkins CI/CD 自动化部署流水线]
-    - [ ] [运用 TensorRT 加速模型推理]
+    - [x] [搭建 Jenkins CI/CD 自动化部署流水线](./chapter15/02_Jenkins.md)
 
 ### 第五部分：大模型安全
 ### 第六部分：多模态前沿
